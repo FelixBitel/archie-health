@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐕 Панель управления здоровьем Арчи</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.7); }
+        }
+        
+        .archie-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        
+        .section-divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, #cbd5e1, transparent);
+            margin: 40px 0;
+        }
+        
+        .stat-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .medicine-card {
+            transition: all 0.3s ease;
+        }
+        
+        .medicine-card:hover {
+            transform: scale(1.02);
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+        }
+        
+        .timeline-item:after {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 24px;
+            width: 2px;
+            height: calc(100% + 10px);
+            background: #cbd5e1;
+        }
+        
+        .timeline-item:last-child:after {
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .auth-tab {
+            color: #6b7280;
+        }
+
+        .auth-tab.active {
+            background-color: white;
+            color: #3b82f6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .modal-enter {
+            animation: modalEnter 0.3s ease;
+        }
+
+        @keyframes modalEnter {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .toast {
+            animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+        }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(100%); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 min-h-screen">
+    <!-- Модальное окно входа -->
+    <div id="login-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-center">
+                <i class="fas fa-dog text-white text-5xl mb-3"></i>
+                <h2 class="text-2xl font-bold text-white">Добро пожаловать!</h2>
+                <p class="text-white/80 text-sm mt-1">Войдите, чтобы управлять здоровьем Арчи</p>
+            </div>
+            <div class="p-6">
+                <!-- Tabs -->
+                <div class="flex mb-6 rounded-xl bg-gray-100 p-1">
+                    <button id="login-tab" class="flex-1 py-2 rounded-lg font-semibold text-sm transition auth-tab active">Вход</button>
+                    <button id="register-tab" class="flex-1 py-2 rounded-lg font-semibold text-sm transition auth-tab">Регистрация</button>
+                </div>
+                
+                <!-- Login Form -->
+                <form id="login-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Логин</label>
+                        <input type="text" id="login-username" required
+                               class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                               placeholder="Введите логин">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Пароль</label>
+                        <input type="password" id="login-password" required
+                               class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                               placeholder="Введите пароль">
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 rounded-xl hover:from-blue-600 hover:to-purple-700 transition">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Войти
+                    </button>
+                </form>
+                
+                <!-- Register Form -->
+                <form id="register-form" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Логин</label>
+                        <input type="text" id="register-username" required
+                               class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                               placeholder="Придумайте логин">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Пароль</label>
+                        <input type="password" id="register-password" required minlength="6"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                               placeholder="Минимум 6 символов">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Подтвердите пароль</label>
+                        <input type="password" id="register-confirm" required
+                               class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                               placeholder="Повторите пароль">
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 rounded-xl hover:from-green-600 hover:to-emerald-700 transition">
+                        <i class="fas fa-user-plus mr-2"></i>Зарегистрироваться
+                    </button>
+                </form>
+                
+                <div id="auth-error" class="hidden mt-4 p-3 bg-red-100 text-red-700 rounded-xl text-sm text-center"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно редактирования профиля Арчи -->
+    <div id="profile-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-center">
+                <i class="fas fa-dog text-white text-4xl mb-2"></i>
+                <h2 class="text-xl font-bold text-white">Редактирование профиля</h2>
+            </div>
+            <form id="profile-form" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Порода</label>
+                    <input type="text" id="edit-breed" 
+                           class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Возраст (лет)</label>
+                    <input type="number" id="edit-age" min="1" max="30"
+                           class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Вес (кг)</label>
+                    <input type="number" id="edit-weight" step="0.1" min="1" max="100"
+                           class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Статус</label>
+                    <input type="text" id="edit-status" 
+                           class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" id="cancel-profile-edit" class="flex-1 bg-gray-200 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-300 transition">
+                        Отмена
+                    </button>
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 rounded-xl hover:from-blue-600 hover:to-purple-700 transition">
+                        Сохранить
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления записи о здоровье -->
+    <div id="health-log-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden max-h-[90vh] overflow-y-auto">
+            <div class="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-center sticky top-0">
+                <i class="fas fa-heartbeat text-white text-4xl mb-2"></i>
+                <h2 class="text-xl font-bold text-white">Добавить запись</h2>
+            </div>
+            <form id="health-log-form" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Тип записи</label>
+                    <select id="log-type" required
+                            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition">
+                        <option value="walk">Прогулка</option>
+                        <option value="medication">Приём лекарства</option>
+                        <option value="weight">Взвешивание</option>
+                        <option value="health">Состояние здоровья</option>
+                        <option value="mood">Настроение</option>
+                        <option value="appetite">Аппетит</option>
+                        <option value="bathroom">Туалет</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Дата</label>
+                        <input type="date" id="log-date" required
+                               class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Время</label>
+                        <input type="time" id="log-time" required
+                               class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition">
+                    </div>
+                </div>
+                <div id="weight-field" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Вес (кг)</label>
+                    <input type="number" id="log-weight" step="0.1" min="1"
+                           class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                           placeholder="21.5">
+                </div>
+                <div id="energy-field" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Уровень энергии</label>
+                    <select id="log-energy"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition">
+                        <option value="высокая">Высокая</option>
+                        <option value="средняя">Средняя</option>
+                        <option value="низкая">Низкая</option>
+                    </select>
+                </div>
+                <div id="severity-field" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Тяжесть</label>
+                    <select id="log-severity"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition">
+                        <option value="легкая">Лёгкая</option>
+                        <option value="средняя">Средняя</option>
+                        <option value="тяжелая">Тяжёлая</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Заметки</label>
+                    <textarea id="log-notes" rows="3"
+                              class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition resize-none"
+                              placeholder="Дополнительная информация..."></textarea>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" id="cancel-health-log" class="flex-1 bg-gray-200 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-300 transition">
+                        Отмена
+                    </button>
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 rounded-xl hover:from-green-600 hover:to-emerald-700 transition">
+                        <i class="fas fa-plus mr-2"></i>Добавить
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления лекарства -->
+    <div id="medication-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="bg-gradient-to-r from-red-500 to-rose-600 p-6 text-center">
+                <i class="fas fa-pills text-white text-4xl mb-2"></i>
+                <h2 class="text-xl font-bold text-white">Добавить лекарство</h2>
+            </div>
+            <form id="medication-form" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Название</label>
+                    <input type="text" id="med-name" required
+                           class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition"
+                           placeholder="Например: Урзахол">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Дозировка</label>
+                    <input type="text" id="med-dosage" required
+                           class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition"
+                           placeholder="Например: 1 капсула">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Время приёма (через запятую)</label>
+                    <input type="text" id="med-times" required
+                           class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition"
+                           placeholder="09:00, 18:00, 21:00">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" id="cancel-medication" class="flex-1 bg-gray-200 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-300 transition">
+                        Отмена
+                    </button>
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-red-500 to-rose-600 text-white font-bold py-3 rounded-xl hover:from-red-600 hover:to-rose-700 transition">
+                        <i class="fas fa-plus mr-2"></i>Добавить
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления приёма пищи -->
+    <div id="meal-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden max-h-[90vh] overflow-y-auto">
+            <div class="bg-gradient-to-r from-orange-500 to-amber-600 p-6 text-center sticky top-0">
+                <i class="fas fa-utensils text-white text-4xl mb-2"></i>
+                <h2 class="text-xl font-bold text-white">Добавить приём пищи</h2>
+            </div>
+            <form id="meal-form" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Название</label>
+                    <input type="text" id="meal-name" required
+                           class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition"
+                           placeholder="Например: Завтрак">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ингредиенты (через запятую)</label>
+                    <textarea id="meal-ingredients" rows="2" required
+                              class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition resize-none"
+                              placeholder="Курица 150г, Рис 100г, Морковь 50г"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Калории</label>
+                    <input type="number" id="meal-calories" required min="1"
+                           class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition"
+                           placeholder="420">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Время</label>
+                    <input type="time" id="meal-time"
+                           class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" id="cancel-meal" class="flex-1 bg-gray-200 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-300 transition">
+                        Отмена
+                    </button>
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-orange-500 to-amber-600 text-white font-bold py-3 rounded-xl hover:from-orange-600 hover:to-amber-700 transition">
+                        <i class="fas fa-plus mr-2"></i>Добавить
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast уведомления -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[200] space-y-3"></div>
+
+    <!-- Шапка -->
+    <header class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <i class="fas fa-dog text-blue-500 text-3xl mr-3"></i>
+                    <h1 class="text-2xl font-bold text-gray-800">Здоровье Арчи</h1>
+                </div>
+                <nav>
+                    <ul class="flex space-x-6">
+                        <li><a href="#health" class="text-gray-600 hover:text-blue-500 font-medium">Здоровье</a></li>
+                        <li><a href="#nutrition" class="text-gray-600 hover:text-blue-500 font-medium">Питание</a></li>
+                        <li><a href="#schedule" class="text-gray-600 hover:text-blue-500 font-medium">Расписание</a></li>
+                        <li><a href="#medicines" class="text-gray-600 hover:text-blue-500 font-medium">Лекарства</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Герой-секция -->
+    <section class="py-16 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4">Забота о здоровье Арчи</h2>
+                    <p class="text-xl mb-6 opacity-90">Персональный план здоровья и ухода для вашего любимого питомца</p>
+                    <div class="flex flex-wrap gap-4">
+                        <button class="bg-white text-blue-600 font-bold py-3 px-6 rounded-full shadow-lg hover:bg-blue-50 transition">
+                            <i class="fas fa-heart mr-2"></i>Состояние здоровья
+                        </button>
+                        <button class="bg-transparent border-2 border-white text-white font-bold py-3 px-6 rounded-full hover:bg-white hover:text-blue-600 transition">
+                            <i class="fas fa-calendar-alt mr-2"></i>Расписание
+                        </button>
+                    </div>
+                </div>
+                <div class="md:w-2/5 flex justify-center">
+                    <img id="archie-avatar" src="https://agi-prod-file-upload-public-main-use1.s3.amazonaws.com/96a9ee32-d2d4-49f7-8f55-8ee55a4f5665" 
+                         alt="Арчи" 
+                         class="archie-avatar pulse-glow border-4 border-white">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Основная информация об Арчи -->
+    <section class="py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Информация о Арчи</h2>
+                <div class="w-24 h-1 bg-blue-500 mx-auto"></div>
+            </div>
+            
+            <div class="flex justify-end mb-4">
+                <button id="edit-profile-btn" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-2 px-4 rounded-xl hover:from-blue-600 hover:to-purple-700 transition shadow-md">
+                    <i class="fas fa-edit mr-2"></i>Редактировать профиль
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl p-6 text-center stat-card shadow-md">
+                    <i class="fas fa-paw text-blue-500 text-3xl mb-3"></i>
+                    <h3 class="text-lg font-semibold text-gray-700">Порода</h3>
+                    <p id="breed" class="text-xl font-bold text-gray-800">Мишлинг</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-green-100 to-green-200 rounded-xl p-6 text-center stat-card shadow-md">
+                    <i class="fas fa-birthday-cake text-green-500 text-3xl mb-3"></i>
+                    <h3 class="text-lg font-semibold text-gray-700">Возраст</h3>
+                    <p id="age" class="text-xl font-bold text-gray-800">11 лет</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl p-6 text-center stat-card shadow-md">
+                    <i class="fas fa-weight-hanging text-purple-500 text-3xl mb-3"></i>
+                    <h3 class="text-lg font-semibold text-gray-700">Вес</h3>
+                    <p id="weight" class="text-xl font-bold text-gray-800">21 кг</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-xl p-6 text-center stat-card shadow-md">
+                    <i class="fas fa-stethoscope text-yellow-500 text-3xl mb-3"></i>
+                    <h3 class="text-lg font-semibold text-gray-700">Статус</h3>
+                    <p id="status" class="text-lg font-bold text-gray-800">Под наблюдением</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Статистика здоровья -->
+    <section id="health" class="py-12 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Мониторинг здоровья</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Отслеживание ключевых показателей здоровья Арчи для поддержания его благополучия</p>
+                <div class="w-24 h-1 bg-blue-500 mx-auto mt-4"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800">История веса</h3>
+                        <button id="add-health-log-btn" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-2 px-4 rounded-xl hover:from-green-600 hover:to-emerald-700 transition shadow-md text-sm">
+                            <i class="fas fa-plus mr-1"></i>Добавить
+                        </button>
+                    </div>
+                    <div id="weight-chart" class="h-64 flex items-end space-x-2">
+                        <!-- Здесь будут отображаться данные графика -->
+                        <div class="flex-1 flex flex-col items-center">
+                            <div class="w-full bg-gray-200 rounded-t-lg" style="height: 70%;">
+                                <div class="bg-gradient-to-t from-blue-500 to-blue-400 w-full rounded-t-lg" style="height: 100%;"></div>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-600">15.11</p>
+                            <p class="text-xs text-gray-500">22.1 кг</p>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center">
+                            <div class="w-full bg-gray-200 rounded-t-lg" style="height: 75%;">
+                                <div class="bg-gradient-to-t from-blue-500 to-blue-400 w-full rounded-t-lg" style="height: 100%;"></div>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-600">20.11</p>
+                            <p class="text-xs text-gray-500">21.8 кг</p>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center">
+                            <div class="w-full bg-gray-200 rounded-t-lg" style="height: 80%;">
+                                <div class="bg-gradient-to-t from-blue-500 to-blue-400 w-full rounded-t-lg" style="height: 100%;"></div>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-600">25.11</p>
+                            <p class="text-xs text-gray-500">21.5 кг</p>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center">
+                            <div class="w-full bg-gray-200 rounded-t-lg" style="height: 85%;">
+                                <div class="bg-gradient-to-t from-blue-500 to-blue-400 w-full rounded-t-lg" style="height: 100%;"></div>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-600">01.12</p>
+                            <p class="text-xs text-gray-500">21.3 кг</p>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center">
+                            <div class="w-full bg-gray-200 rounded-t-lg" style="height: 90%;">
+                                <div class="bg-gradient-to-t from-blue-500 to-blue-400 w-full rounded-t-lg" style="height: 100%;"></div>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-600">07.12</p>
+                            <p class="text-xs text-gray-500">21.2 кг</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Текущее состояние</h3>
+                    <div class="space-y-5">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-gray-700">Энергия</span>
+                                <span id="energy-level" class="text-gray-700">Высокая</span>
+                            </div>
+                            <div class="progress-bar bg-gray-200">
+                                <div id="energy-progress" class="progress-fill bg-green-500" style="width: 85%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-gray-700">Аппетит</span>
+                                <span id="appetite-level" class="text-gray-700">Хороший</span>
+                            </div>
+                            <div class="progress-bar bg-gray-200">
+                                <div id="appetite-progress" class="progress-fill bg-blue-500" style="width: 90%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-gray-700">Настроение</span>
+                                <span id="mood-level" class="text-gray-700">Стабильное</span>
+                            </div>
+                            <div class="progress-bar bg-gray-200">
+                                <div id="mood-progress" class="progress-fill bg-yellow-500" style="width: 75%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-gray-700">Активность</span>
+                                <span id="activity-level" class="text-gray-700">Умеренная</span>
+                            </div>
+                            <div class="progress-bar bg-gray-200">
+                                <div id="activity-progress" class="progress-fill bg-purple-500" style="width: 70%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Питание -->
+    <section id="nutrition" class="py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Питание Арчи</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Сбалансированный рацион для поддержания здоровья и энергии вашего любимца</p>
+                <div class="w-24 h-1 bg-blue-500 mx-auto mt-4"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-8 shadow-md">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold text-gray-800 flex items-center">
+                            <i class="fas fa-utensils text-orange-500 mr-3"></i>
+                            Рацион на сегодня
+                        </h3>
+                        <button id="add-meal-btn" class="bg-gradient-to-r from-orange-500 to-amber-600 text-white font-semibold py-2 px-4 rounded-xl hover:from-orange-600 hover:to-amber-700 transition shadow-md text-sm">
+                            <i class="fas fa-plus mr-1"></i>Добавить
+                        </button>
+                    </div>
+                    
+                    <div id="meals-container" class="space-y-6">
+                        <!-- Приемы пищи будут загружаться здесь -->
+                        <div class="bg-white rounded-xl p-5 shadow-sm">
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 class="font-bold text-lg text-gray-800">Завтрак</h4>
+                                <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm">09:30</span>
+                            </div>
+                            <p class="text-gray-600 mb-2">Курица 150г, Рис 100г, Морковь 50г</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-700 font-semibold">420 ккал</span>
+                                <span class="text-green-600 font-semibold">✓ Принят</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-5 shadow-sm">
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 class="font-bold text-lg text-gray-800">Ужин</h4>
+                                <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm">19:00</span>
+                            </div>
+                            <p class="text-gray-600 mb-2">Говядина 150г, Гречка 100г, Тыква 50г</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-700 font-semibold">450 ккал</span>
+                                <span class="text-gray-500 font-semibold">Ожидается</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 p-4 bg-white rounded-xl">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-gray-700">Потреблено сегодня</span>
+                            <span id="calories-consumed" class="font-bold text-gray-800">420 / 870 ккал</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-4">
+                            <div id="calories-progress" class="bg-gradient-to-r from-orange-400 to-orange-500 h-4 rounded-full" style="width: 48%"></div>
+                        </div>
+                        <p id="calories-percentage" class="text-right text-sm text-gray-600 mt-1">48% от дневной нормы</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-8 shadow-md">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-book text-green-500 mr-3"></i>
+                        Рецепты для Арчи
+                    </h3>
+                    
+                    <div id="recipes-container" class="space-y-5">
+                        <!-- Рецепты будут загружаться здесь -->
+                        <div class="bg-white rounded-xl p-5 shadow-sm medicine-card">
+                            <h4 class="font-bold text-lg text-gray-800 mb-2">Куриное рагу</h4>
+                            <p class="text-gray-600 text-sm mb-3">Курица, Рис, Морковь, Кабачок</p>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-700">850 ккал / 2 порции</span>
+                                <span class="text-green-600 font-semibold">✓ Одобрено ветеринаром</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-5 shadow-sm medicine-card">
+                            <h4 class="font-bold text-lg text-gray-800 mb-2">Говяжий микс</h4>
+                            <p class="text-gray-600 text-sm mb-3">Говядина, Гречка, Тыква, Яблоко</p>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-700">900 ккал / 2 порции</span>
+                                <span class="text-green-600 font-semibold">✓ Одобрено ветеринаром</span>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full mt-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition">
+                            <i class="fas fa-plus mr-2"></i>Добавить новый рецепт
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Расписание -->
+    <section id="schedule" class="py-12 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Ежедневное расписание</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Организованный график для обеспечения стабильности и благополучия Арчи</p>
+                <div class="w-24 h-1 bg-blue-500 mx-auto mt-4"></div>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-walking text-blue-500 mr-3"></i>
+                            Прогулки и активность
+                        </h3>
+                        
+                        <div id="walks-schedule" class="space-y-4">
+                            <!-- Расписание прогулок будет загружаться здесь -->
+                            <div class="timeline-item">
+                                <div class="flex justify-between items-center bg-blue-50 p-4 rounded-lg">
+                                    <div>
+                                        <h4 class="font-bold text-gray-800">Утренняя прогулка</h4>
+                                        <p class="text-gray-600 text-sm">30 минут</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-bold text-gray-800">08:00</p>
+                                        <p class="text-green-600 text-sm">✓ Завершена</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item">
+                                <div class="flex justify-between items-center bg-blue-50 p-4 rounded-lg">
+                                    <div>
+                                        <h4 class="font-bold text-gray-800">Дневная прогулка</h4>
+                                        <p class="text-gray-600 text-sm">45 минут</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-bold text-gray-800">14:00</p>
+                                        <p class="text-gray-500 text-sm">Ожидается</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item">
+                                <div class="flex justify-between items-center bg-blue-50 p-4 rounded-lg">
+                                    <div>
+                                        <h4 class="font-bold text-gray-800">Вечерняя прогулка</h4>
+                                        <p class="text-gray-600 text-sm">20 минут</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-bold text-gray-800">21:00</p>
+                                        <p class="text-gray-500 text-sm">Ожидается</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-clock text-purple-500 mr-3"></i>
+                            Важные события
+                        </h3>
+                        
+                        <div id="events-schedule" class="space-y-4">
+                            <!-- Расписание событий будет загружаться здесь -->
+                            <div class="timeline-item">
+                                <div class="flex justify-between items-center bg-purple-50 p-4 rounded-lg">
+                                    <div>
+                                        <h4 class="font-bold text-gray-800">Прием Урзахола</h4>
+                                        <p class="text-gray-600 text-sm">1 капсула</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-bold text-gray-800">09:00</p>
+                                        <p class="text-green-600 text-sm">✓ Принят</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item">
+                                <div class="flex justify-between items-center bg-purple-50 p-4 rounded-lg">
+                                    <div>
+                                        <h4 class="font-bold text-gray-800">Прием Гепатосана</h4>
+                                        <p class="text-gray-600 text-sm">1 таблетка</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-bold text-gray-800">18:00</p>
+                                        <p class="text-gray-500 text-sm">Ожидается</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item">
+                                <div class="flex justify-between items-center bg-purple-50 p-4 rounded-lg">
+                                    <div>
+                                        <h4 class="font-bold text-gray-800">Проверка веса</h4>
+                                        <p class="text-gray-600 text-sm">Еженедельно</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-bold text-gray-800">10:00</p>
+                                        <p class="text-gray-500 text-sm">Ожидается</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Лекарства -->
+    <section id="medicines" class="py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Медикаменты Арчи</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Информация о текущих лекарствах и режиме приема</p>
+                <div class="w-24 h-1 bg-blue-500 mx-auto mt-4"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-2xl p-8 shadow-md">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold text-gray-800 flex items-center">
+                            <i class="fas fa-pills text-red-500 mr-3"></i>
+                            Текущие препараты
+                        </h3>
+                        <button id="add-medication-btn" class="bg-gradient-to-r from-red-500 to-rose-600 text-white font-semibold py-2 px-4 rounded-xl hover:from-red-600 hover:to-rose-700 transition shadow-md text-sm">
+                            <i class="fas fa-plus mr-1"></i>Добавить
+                        </button>
+                    </div>
+                    
+                    <div id="medications-container" class="space-y-5">
+                        <!-- Лекарства будут загружаться здесь -->
+                        <div class="bg-white rounded-xl p-5 shadow-sm medicine-card">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-lg text-gray-800">Урзахол</h4>
+                                    <p class="text-gray-600 text-sm">Противовоспалительное средство</p>
+                                </div>
+                                <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">Активно</span>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-gray-700 font-semibold">Режим приема:</p>
+                                <ul class="mt-2 space-y-1">
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>09:00 - 1 капсула</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>21:00 - 1 капсула</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-5 shadow-sm medicine-card">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-lg text-gray-800">Гепатосан</h4>
+                                    <p class="text-gray-600 text-sm">Гепатопротектор</p>
+                                </div>
+                                <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">Активно</span>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-gray-700 font-semibold">Режим приема:</p>
+                                <ul class="mt-2 space-y-1">
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>09:00 - 1 таблетка</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>18:00 - 1 таблетка</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl p-8 shadow-md">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-notes-medical text-indigo-500 mr-3"></i>
+                        Медицинская история
+                    </h3>
+                    
+                    <div id="medical-history" class="space-y-5">
+                        <!-- Медицинская история будет загружаться здесь -->
+                        <div class="bg-white rounded-xl p-5 shadow-sm">
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 class="font-bold text-gray-800">Операция на левой лапе</h4>
+                                <span class="text-sm text-gray-500">05.12.2024</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">Послеоперационный период, наблюдение ветеринара</p>
+                            <div class="flex items-center">
+                                <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs">Под наблюдением</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-5 shadow-sm">
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 class="font-bold text-gray-800">Анализы крови</h4>
+                                <span class="text-sm text-gray-500">15.10.2024</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">Общий анализ крови, биохимия</p>
+                            <div class="flex items-center">
+                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs">В норме</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-5 shadow-sm">
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 class="font-bold text-gray-800">Ветеринарный паспорт</h4>
+                                <span class="text-sm text-gray-500">Постоянный</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">Все прививки по возрасту, регулярное наблюдение</p>
+                            <div class="flex items-center">
+                                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs">Актуально</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Рекомендации -->
+    <section class="py-12 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4">Рекомендации по уходу</h2>
+                <p class="max-w-2xl mx-auto opacity-90">Советы ветеринаров для поддержания здоровья и счастья Арчи</p>
+                <div class="w-24 h-1 bg-white mx-auto mt-4 opacity-50"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center">
+                    <i class="fas fa-heartbeat text-4xl mb-4"></i>
+                    <h3 class="text-xl font-bold mb-3">Физическая активность</h3>
+                    <p class="opacity-90">Регулярные прогулки умеренной интенсивности помогают поддерживать мышечный тонус и общее самочувствие, особенно важно после операции.</p>
+                </div>
+                
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center">
+                    <i class="fas fa-apple-alt text-4xl mb-4"></i>
+                    <h3 class="text-xl font-bold mb-3">Специализированный рацион</h3>
+                    <p class="opacity-90">Сбалансированное питание с учетом возраста и состояния здоровья, богатое легкоусвояемыми белками и полезными микроэлементами.</p>
+                </div>
+                
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center">
+                    <i class="fas fa-user-md text-4xl mb-4"></i>
+                    <h3 class="text-xl font-bold mb-3">Регулярное наблюдение</h3>
+                    <p class="opacity-90">Плановые осмотры у ветеринара и сдача анализов позволяют контролировать состояние здоровья и предотвращать осложнения.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="flex justify-center mb-6">
+                    <i class="fas fa-dog text-blue-400 text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-4">Здоровье Арчи</h3>
+                <p id="last-update" class="text-gray-400 max-w-2xl mx-auto mb-8">
+                    Персонализированный подход к уходу за вашим любимцем. Все данные актуальны на 07.12.2024
+                </p>
+                <div class="border-t border-gray-700 pt-8">
+                    <p class="text-gray-500">© 2024 Здоровье Арчи. Создано с любовью для вашего четвероногого друга.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+
+        // === УТИЛИТЫ ===
+
+        function getToken() { return localStorage.getItem('authToken'); }
+        function setToken(token) { localStorage.setItem('authToken', token); }
+        function removeToken() { localStorage.removeItem('authToken'); }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-500'
+            };
+            toast.className = `toast ${colors[type]} text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3`;
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function showModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.remove('hidden');
+            modal.querySelector('.bg-white, .bg-gradient-to-r').parentElement.classList.add('modal-enter');
+        }
+
+        function hideModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function setLoading(btn, loading, originalText) {
+            if (loading) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="loading inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>Загрузка...';
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        // === API ФУНКЦИИ ===
+
+        async function apiRequest(endpoint, method = 'GET', body = null) {
+            const token = getToken();
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                }
+            };
+            if (body) options.body = JSON.stringify(body);
+            
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+            const data = await response.json();
+            
+            if (!response.ok) {
+                if (response.status === 401) {
+                    removeToken();
+                    showModal('login-modal');
+                }
+                throw new Error(data.msg || 'Ошибка сервера');
+            }
+            return data;
+        }
+
+        // === АВТОРИЗАЦИЯ ===
+
+        async function login(username, password) {
+            const data = await apiRequest('/auth/login', 'POST', { username, password });
+            setToken(data.token);
+            hideModal('login-modal');
+            showToast('Вход выполнен успешно!');
+            refreshAllData();
+        }
+
+        async function register(username, password) {
+            if (password !== document.getElementById('register-confirm').value) {
+                throw new Error('Пароли не совпадают');
+            }
+            const data = await apiRequest('/auth/register', 'POST', { username, password });
+            setToken(data.token);
+            hideModal('login-modal');
+            showToast('Регистрация прошла успешно!');
+            refreshAllData();
+        }
+
+        function logout() {
+            removeToken();
+            showToast('Вы вышли из системы', 'info');
+            setTimeout(() => location.reload(), 1000);
+        }
+
+        // === ДАННЫЕ ПРОФИЛЯ ===
+
+        async function fetchArchieProfile() {
+            try {
+                const profile = await apiRequest('/health/profile');
+                document.getElementById('breed').textContent = profile.breed;
+                document.getElementById('age').textContent = `${profile.age} лет`;
+                document.getElementById('weight').textContent = `${profile.weight} кг`;
+                document.getElementById('status').textContent = profile.status;
+            } catch (e) {
+                console.error('Ошибка загрузки профиля:', e);
+            }
+        }
+
+        async function updateProfile(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            setLoading(btn, true, originalText);
+
+            try {
+                await apiRequest('/health/profile', 'PUT', {
+                    breed: document.getElementById('edit-breed').value,
+                    age: parseInt(document.getElementById('edit-age').value),
+                    weight: parseFloat(document.getElementById('edit-weight').value),
+                    status: document.getElementById('edit-status').value
+                });
+                hideModal('profile-modal');
+                showToast('Профиль обновлён');
+                fetchArchieProfile();
+            } catch (e) {
+                showToast(e.message, 'error');
+            } finally {
+                setLoading(btn, false, originalText);
+            }
+        }
+
+        // === ПРИЁМЫ ПИЩИ ===
+
+        async function fetchMeals() {
+            try {
+                const meals = await apiRequest('/nutrition/meals');
+                const container = document.getElementById('meals-container');
+                container.innerHTML = meals.length ? meals.map(meal => `
+                    <div class="bg-white rounded-xl p-5 shadow-sm">
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="font-bold text-lg text-gray-800">${meal.name}</h4>
+                            <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm">${meal.mealTime || '—'}</span>
+                        </div>
+                        <p class="text-gray-600 mb-2">${Array.isArray(meal.ingredients) ? meal.ingredients.join(', ') : meal.ingredients}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 font-semibold">${meal.calories} ккал</span>
+                        </div>
+                    </div>
+                `).join('') : '<p class="text-gray-500 text-center py-4">Нет записей</p>';
+
+                const total = meals.reduce((s, m) => s + (m.calories || 0), 0);
+                const target = 870;
+                const pct = Math.round((total / target) * 100);
+                document.getElementById('calories-consumed').textContent = `${total} / ${target} ккал`;
+                document.getElementById('calories-progress').style.width = `${Math.min(pct, 100)}%`;
+                document.getElementById('calories-percentage').textContent = `${pct}% от дневной нормы`;
+            } catch (e) {
+                console.error('Ошибка загрузки приёмов пищи:', e);
+            }
+        }
+
+        async function addMeal(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            setLoading(btn, true, originalText);
+
+            try {
+                const ingredients = document.getElementById('meal-ingredients').value.split(',').map(s => s.trim()).filter(Boolean);
+                await apiRequest('/nutrition/meals', 'POST', {
+                    name: document.getElementById('meal-name').value,
+                    ingredients,
+                    calories: parseInt(document.getElementById('meal-calories').value),
+                    mealTime: document.getElementById('meal-time').value || null
+                });
+                hideModal('meal-modal');
+                e.target.reset();
+                showToast('Приём пищи добавлен');
+                fetchMeals();
+            } catch (e) {
+                showToast(e.message, 'error');
+            } finally {
+                setLoading(btn, false, originalText);
+            }
+        }
+
+        // === ЛЕКАРСТВА ===
+
+        async function fetchMedications() {
+            try {
+                const meds = await apiRequest('/medication');
+                const container = document.getElementById('medications-container');
+                container.innerHTML = meds.length ? meds.map(med => `
+                    <div class="bg-white rounded-xl p-5 shadow-sm medicine-card">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-lg text-gray-800">${med.name}</h4>
+                                <p class="text-gray-600 text-sm">${med.dosage}</p>
+                            </div>
+                            <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">Активно</span>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-100">
+                            <p class="text-gray-700 font-semibold">Режим приёма:</p>
+                            <ul class="mt-2 space-y-1">
+                                ${(med.times || []).map(t => `
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>${t} — ${med.dosage}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `).join('') : '<p class="text-gray-500 text-center py-4">Нет активных лекарств</p>';
+            } catch (e) {
+                console.error('Ошибка загрузки лекарств:', e);
+            }
+        }
+
+        async function addMedication(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            setLoading(btn, true, originalText);
+
+            try {
+                const times = document.getElementById('med-times').value.split(',').map(s => s.trim()).filter(Boolean);
+                await apiRequest('/medication', 'POST', {
+                    name: document.getElementById('med-name').value,
+                    dosage: document.getElementById('med-dosage').value,
+                    times
+                });
+                hideModal('medication-modal');
+                e.target.reset();
+                showToast('Лекарство добавлено');
+                fetchMedications();
+            } catch (e) {
+                showToast(e.message, 'error');
+            } finally {
+                setLoading(btn, false, originalText);
+            }
+        }
+
+        // === ЗАПИСИ О ЗДОРОВЬЕ ===
+
+        async function fetchHealthLogs() {
+            try {
+                const logs = await apiRequest('/health/logs');
+                if (logs.length) {
+                    const lastLog = logs[0];
+                    const d = new Date(lastLog.date);
+                    document.getElementById('last-update').textContent =
+                        `Персонализированный подход. Последнее обновление: ${d.toLocaleDateString('ru-RU')}`;
+                }
+                updateStatusFromLogs(logs);
+            } catch (e) {
+                console.error('Ошибка загрузки записей:', e);
+            }
+        }
+
+        async function addHealthLog(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            setLoading(btn, true, originalText);
+
+            try {
+                const logData = {
+                    date: document.getElementById('log-date').value,
+                    time: document.getElementById('log-time').value,
+                    type: document.getElementById('log-type').value,
+                    notes: document.getElementById('log-notes').value
+                };
+
+                const type = logData.type;
+                if (type === 'weight') {
+                    logData.weight = parseFloat(document.getElementById('log-weight').value);
+                }
+                if (type === 'walk') {
+                    logData.energy = document.getElementById('log-energy').value;
+                }
+                if (type === 'health') {
+                    logData.severity = document.getElementById('log-severity').value;
+                }
+
+                await apiRequest('/health/logs', 'POST', logData);
+                hideModal('health-log-modal');
+                e.target.reset();
+                showToast('Запись добавлена');
+                fetchHealthLogs();
+                updateWeightChart();
+            } catch (e) {
+                showToast(e.message, 'error');
+            } finally {
+                setLoading(btn, false, originalText);
+            }
+        }
+
+        async function updateWeightChart() {
+            try {
+                const logs = await apiRequest('/health/logs');
+                const weightLogs = logs.filter(l => l.weight && l.type === 'weight');
+                
+                const container = document.getElementById('weight-chart');
+                
+                if (!weightLogs.length) {
+                    container.innerHTML = '<p class="text-gray-400 text-center w-full">Нет данных о весе</p>';
+                    return;
+                }
+
+                weightLogs.sort((a, b) => new Date(a.date) - new Date(b.date));
+                const weights = weightLogs.map(l => l.weight);
+                const min = Math.min(...weights);
+                const max = Math.max(...weights);
+                const range = max - min || 1;
+
+                container.innerHTML = weightLogs.map(log => {
+                    const d = new Date(log.date);
+                    const dm = `${d.getDate()}.${String(d.getMonth()+1).padStart(2,'0')}`;
+                    const h = 30 + ((log.weight - min) / range) * 70;
+                    return `
+                        <div class="flex-1 flex flex-col items-center">
+                            <div class="w-full bg-gray-200 rounded-t-lg" style="height:${h}%">
+                                <div class="bg-gradient-to-t from-blue-500 to-blue-400 w-full rounded-t-lg" style="height:100%"></div>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-600">${dm}</p>
+                            <p class="text-xs text-gray-500">${log.weight} кг</p>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error('Ошибка обновления графика:', e);
+            }
+        }
+
+        function updateStatusFromLogs(logs) {
+            const walk = logs.find(l => l.type === 'walk');
+            const appetite = logs.find(l => l.type === 'appetite');
+            const mood = logs.find(l => l.type === 'mood');
+
+            if (walk?.energy) {
+                const map = { 'высокая': ['Высокая', 85], 'средняя': ['Средняя', 60], 'низкая': ['Низкая', 30] };
+                const [label, width] = map[walk.energy] || ['Средняя', 60];
+                document.getElementById('energy-level').textContent = label;
+                document.getElementById('energy-progress').style.width = width + '%';
+            }
+
+            if (appetite?.notes) {
+                const t = appetite.notes.toLowerCase();
+                const [label, width] = t.includes('хорош') || t.includes('отличн') ? ['Хороший', 90]
+                    : t.includes('средн') ? ['Средний', 60] : ['Плохой', 30];
+                document.getElementById('appetite-level').textContent = label;
+                document.getElementById('appetite-progress').style.width = width + '%';
+            }
+
+            if (mood?.notes) {
+                const t = mood.notes.toLowerCase();
+                const [label, width] = t.includes('радост') || t.includes('весел') ? ['Радостное', 90]
+                    : t.includes('спок') || t.includes('стабил') ? ['Стабильное', 75] : ['Подавленное', 30];
+                document.getElementById('mood-level').textContent = label;
+                document.getElementById('mood-progress').style.width = width + '%';
+            }
+        }
+
+        // === ОТКРЫТИЕ МОДАЛЬНЫХ ОКОН С ЗАПОЛНЕНИЕМ ДАННЫХ ===
+
+        function openProfileModal() {
+            document.getElementById('edit-breed').value = document.getElementById('breed').textContent.replace(' лет', '');
+            document.getElementById('edit-age').value = parseInt(document.getElementById('age').textContent) || 11;
+            document.getElementById('edit-weight').value = parseFloat(document.getElementById('weight').textContent) || 21;
+            document.getElementById('edit-status').value = document.getElementById('status').textContent;
+            showModal('profile-modal');
+        }
+
+        function toggleLogFields() {
+            const type = document.getElementById('log-type').value;
+            document.getElementById('weight-field').classList.toggle('hidden', type !== 'weight');
+            document.getElementById('energy-field').classList.toggle('hidden', type !== 'walk');
+            document.getElementById('severity-field').classList.toggle('hidden', type !== 'health');
+        }
+
+        function refreshAllData() {
+            fetchArchieProfile();
+            fetchMeals();
+            fetchMedications();
+            fetchHealthLogs();
+            updateWeightChart();
+        }
+
+        // === ИНИЦИАЛИЗАЦИЯ ===
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Авто-открытие модального окна если нет токена
+            if (!getToken()) {
+                showModal('login-modal');
+            } else {
+                refreshAllData();
+            }
+            setInterval(refreshAllData, 300000);
+
+            // Табы авторизации
+            document.getElementById('login-tab').addEventListener('click', () => {
+                document.getElementById('login-tab').classList.add('active');
+                document.getElementById('register-tab').classList.remove('active');
+                document.getElementById('login-form').classList.remove('hidden');
+                document.getElementById('register-form').classList.add('hidden');
+                document.getElementById('auth-error').classList.add('hidden');
+            });
+
+            document.getElementById('register-tab').addEventListener('click', () => {
+                document.getElementById('register-tab').classList.add('active');
+                document.getElementById('login-tab').classList.remove('active');
+                document.getElementById('register-form').classList.remove('hidden');
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('auth-error').classList.add('hidden');
+            });
+
+            // Формы авторизации
+            document.getElementById('login-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const errEl = document.getElementById('auth-error');
+                try {
+                    await login(
+                        document.getElementById('login-username').value,
+                        document.getElementById('login-password').value
+                    );
+                    errEl.classList.add('hidden');
+                } catch (err) {
+                    errEl.textContent = err.message;
+                    errEl.classList.remove('hidden');
+                }
+            });
+
+            document.getElementById('register-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const errEl = document.getElementById('auth-error');
+                try {
+                    await register(
+                        document.getElementById('register-username').value,
+                        document.getElementById('register-password').value
+                    );
+                    errEl.classList.add('hidden');
+                } catch (err) {
+                    errEl.textContent = err.message;
+                    errEl.classList.remove('hidden');
+                }
+            });
+
+            // Кнопки открытия модальных окон
+            document.getElementById('edit-profile-btn').addEventListener('click', openProfileModal);
+            document.getElementById('add-health-log-btn').addEventListener('click', () => {
+                document.getElementById('log-date').valueAsDate = new Date();
+                document.getElementById('log-time').value = new Date().toTimeString().slice(0, 5);
+                toggleLogFields();
+                showModal('health-log-modal');
+            });
+            document.getElementById('add-medication-btn').addEventListener('click', () => showModal('medication-modal'));
+            document.getElementById('add-meal-btn').addEventListener('click', () => showModal('meal-modal'));
+
+            // Закрытие модальных окон
+            ['cancel-profile-edit', 'cancel-health-log', 'cancel-medication', 'cancel-meal'].forEach(id => {
+                document.getElementById(id)?.addEventListener('click', () => {
+                    hideModal(id.replace('cancel-', '').replace('-edit', '') + '-modal');
+                });
+            });
+
+            // Динамическое отображение полей в форме здоровья
+            document.getElementById('log-type').addEventListener('change', toggleLogFields);
+
+            // Отправка форм
+            document.getElementById('profile-form').addEventListener('submit', updateProfile);
+            document.getElementById('health-log-form').addEventListener('submit', addHealthLog);
+            document.getElementById('medication-form').addEventListener('submit', addMedication);
+            document.getElementById('meal-form').addEventListener('submit', addMeal);
+
+            // Закрытие модальных окон по клику на фон
+            ['login-modal', 'profile-modal', 'health-log-modal', 'medication-modal', 'meal-modal'].forEach(id => {
+                document.getElementById(id)?.addEventListener('click', (e) => {
+                    if (e.target.id === id) hideModal(id);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
