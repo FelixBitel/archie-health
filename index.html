@@ -1000,18 +1000,19 @@
         });
         
         // === CHECKLIST ===
+        const freqOrder = { daily: 1, weekly: 2, monthly: 3 };
         const defaultTasks = [
-            { id: 1, text: 'Утреннее кормление', freq: 'daily', done: false },
-            { id: 2, text: 'Вечернее кормление', freq: 'daily', done: false },
-            { id: 3, text: 'Прогулка', freq: 'daily', done: false },
-            { id: 4, text: 'Чистка зубов', freq: 'daily', done: false },
-            { id: 5, text: 'Проверить воду', freq: 'daily', done: false },
-            { id: 6, text: 'Расчёсывание', freq: 'weekly', done: false },
-            { id: 7, text: 'Обрезка когтей', freq: 'weekly', done: false },
-            { id: 8, text: 'Чистка ушей', freq: 'weekly', done: false },
-            { id: 9, text: 'Ветеринарный осмотр', freq: 'monthly', done: false },
-            { id: 10, text: 'Анализ крови', freq: 'monthly', done: false },
-            { id: 11, text: 'Купание', freq: 'monthly', done: false },
+            { id: 1, text: 'Утреннее кормление', freq: 'daily', done: false, _sortOrder: 1 },
+            { id: 2, text: 'Вечернее кормление', freq: 'daily', done: false, _sortOrder: 1 },
+            { id: 3, text: 'Прогулка', freq: 'daily', done: false, _sortOrder: 1 },
+            { id: 4, text: 'Чистка зубов', freq: 'daily', done: false, _sortOrder: 1 },
+            { id: 5, text: 'Проверить воду', freq: 'daily', done: false, _sortOrder: 1 },
+            { id: 6, text: 'Расчёсывание', freq: 'weekly', done: false, _sortOrder: 2 },
+            { id: 7, text: 'Обрезка когтей', freq: 'weekly', done: false, _sortOrder: 2 },
+            { id: 8, text: 'Чистка ушей', freq: 'weekly', done: false, _sortOrder: 2 },
+            { id: 9, text: 'Ветеринарный осмотр', freq: 'monthly', done: false, _sortOrder: 3 },
+            { id: 10, text: 'Анализ крови', freq: 'monthly', done: false, _sortOrder: 3 },
+            { id: 11, text: 'Купание', freq: 'monthly', done: false, _sortOrder: 3 },
         ];
         
         let checklistTasks = [];
@@ -1085,14 +1086,18 @@
             const text = input.value.trim();
             if (!text) return;
             
+            const freqOrder = { daily: 1, weekly: 2, monthly: 3 };
             const newTask = {
                 id: Date.now(),
                 text: text,
                 freq: select.value,
-                done: false
+                done: false,
+                _sortOrder: freqOrder[select.value]
             };
             
             checklistTasks.push(newTask);
+            // Sort by freq, then by id
+            checklistTasks.sort((a, b) => (a._sortOrder || 4) - (b._sortOrder || 4) || a.id - b.id);
             saveChecklist();
             input.value = '';
             renderChecklist(document.getElementById('checklist-filter').value);
