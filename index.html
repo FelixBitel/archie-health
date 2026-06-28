@@ -364,30 +364,47 @@
                     <div class="mb-4">
                         <p class="text-xs text-gray-500 mb-2">Мясо:</p>
                         <div class="flex flex-wrap gap-2">
-                            <button onclick="addMealProduct('Курица', 165, 150, 'breakfast')" class="btn-ghost text-xs">🍗 Курица 150г</button>
-                            <button onclick="addMealProduct('Говядина', 250, 100, 'breakfast')" class="btn-ghost text-xs">🥩 Говядина 100г</button>
-                            <button onclick="addMealProduct('Печень', 119, 80, 'breakfast')" class="btn-ghost text-xs">🫘 Печень 80г</button>
-                            <button onclick="addMealProduct('Рыба', 90, 120, 'breakfast')" class="btn-ghost text-xs">🐟 Рыба 120г</button>
-                            <button onclick="addMealProduct('Яйцо', 155, 50, 'breakfast')" class="btn-ghost text-xs">🥚 Яйцо 50г</button>
+                            <button onclick="showWeightInput('Курица', 165, 'breakfast')" class="btn-ghost text-xs">🍗 Курица</button>
+                            <button onclick="showWeightInput('Говядина', 250, 'breakfast')" class="btn-ghost text-xs">🥩 Говядина</button>
+                            <button onclick="showWeightInput('Печень', 119, 'breakfast')" class="btn-ghost text-xs">🫘 Печень</button>
+                            <button onclick="showWeightInput('Рыба', 90, 'breakfast')" class="btn-ghost text-xs">🐟 Рыба</button>
+                            <button onclick="showWeightInput('Яйцо', 155, 'breakfast')" class="btn-ghost text-xs">🥚 Яйцо</button>
                         </div>
                     </div>
                     
                     <div class="mb-4">
                         <p class="text-xs text-gray-500 mb-2">Крупы:</p>
                         <div class="flex flex-wrap gap-2">
-                            <button onclick="addMealProduct('Рис', 130, 80, 'breakfast')" class="btn-ghost text-xs">🍚 Рис 80г</button>
-                            <button onclick="addMealProduct('Гречка', 110, 80, 'breakfast')" class="btn-ghost text-xs">🌾 Гречка 80г</button>
-                            <button onclick="addMealProduct('Овсянка', 68, 60, 'breakfast')" class="btn-ghost text-xs">🥣 Овсянка 60г</button>
+                            <button onclick="showWeightInput('Рис', 130, 'breakfast')" class="btn-ghost text-xs">🍚 Рис</button>
+                            <button onclick="showWeightInput('Гречка', 110, 'breakfast')" class="btn-ghost text-xs">🌾 Гречка</button>
+                            <button onclick="showWeightInput('Овсянка', 68, 'breakfast')" class="btn-ghost text-xs">🥣 Овсянка</button>
                         </div>
                     </div>
                     
                     <div class="mb-4">
                         <p class="text-xs text-gray-500 mb-2">Овощи:</p>
                         <div class="flex flex-wrap gap-2">
-                            <button onclick="addMealProduct('Морковь', 35, 50, 'breakfast')" class="btn-ghost text-xs">🥕 Морковь</button>
-                            <button onclick="addMealProduct('Тыква', 26, 80, 'breakfast')" class="btn-ghost text-xs">🎃 Тыква</button>
-                            <button onclick="addMealProduct('Кабачок', 24, 60, 'breakfast')" class="btn-ghost text-xs">🥒 Кабачок</button>
-                            <button onclick="addMealProduct('Брокколи', 34, 50, 'breakfast')" class="btn-ghost text-xs">🥦 Брокколи</button>
+                            <button onclick="showWeightInput('Морковь', 35, 'breakfast')" class="btn-ghost text-xs">🥕 Морковь</button>
+                            <button onclick="showWeightInput('Тыква', 26, 'breakfast')" class="btn-ghost text-xs">🎃 Тыква</button>
+                            <button onclick="showWeightInput('Кабачок', 24, 'breakfast')" class="btn-ghost text-xs">🥒 Кабачок</button>
+                            <button onclick="showWeightInput('Брокколи', 34, 'breakfast')" class="btn-ghost text-xs">🥦 Брокколи</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Weight input modal -->
+                    <div id="weight-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
+                        <div class="glass-card rounded-2xl p-6 w-72">
+                            <h4 id="weight-product-name" class="font-bold mb-4 text-center">Продукт</h4>
+                            <div class="flex items-center justify-center gap-3 mb-4">
+                                <input type="number" id="weight-input" value="100" min="1" max="1000" 
+                                    class="w-24 text-center bg-white/10 border border-white/20 rounded-xl py-3 text-xl font-bold focus:outline-none focus:border-orange-500">
+                                <span class="text-gray-400 text-lg">г</span>
+                            </div>
+                            <div id="weight-preview" class="text-center text-sm text-gray-400 mb-4">~0 ккал</div>
+                            <div class="flex gap-2">
+                                <button onclick="closeWeightModal()" class="flex-1 py-2 btn-ghost rounded-xl">Отмена</button>
+                                <button onclick="confirmAddProduct()" class="flex-1 py-2 bg-green-500 rounded-xl font-semibold hover:bg-green-600">Добавить</button>
+                            </div>
                         </div>
                     </div>
                     
@@ -744,21 +761,48 @@
         const dinnerProducts = [];
         const MIN_CALS = 800;
         const MAX_CALS = 1000;
+        let pendingProduct = null;
+        
+        function showWeightInput(name, calsPer100g, meal) {
+            pendingProduct = { name, calsPer100g, meal };
+            document.getElementById('weight-product-name').textContent = name;
+            document.getElementById('weight-input').value = 100;
+            document.getElementById('weight-preview').textContent = `~${calsPer100g} ккал/100г`;
+            document.getElementById('weight-modal').classList.remove('hidden');
+            document.getElementById('weight-input').focus();
+            document.getElementById('weight-input').select();
+        }
+        
+        function updateWeightPreview() {
+            if (!pendingProduct) return;
+            const w = parseInt(document.getElementById('weight-input').value) || 0;
+            const cals = Math.round((pendingProduct.calsPer100g / 100) * w);
+            document.getElementById('weight-preview').textContent = `~${cals} ккал`;
+        }
+        
+        document.getElementById('weight-input')?.addEventListener('input', updateWeightPreview);
+        
+        function closeWeightModal() {
+            document.getElementById('weight-modal').classList.add('hidden');
+            pendingProduct = null;
+        }
+        
+        function confirmAddProduct() {
+            if (!pendingProduct) return;
+            const weight = parseInt(document.getElementById('weight-input').value) || 100;
+            addMealProduct(pendingProduct.name, pendingProduct.calsPer100g, weight, pendingProduct.meal);
+            closeWeightModal();
+        }
         
         function addMealProduct(name, calsPer100g, weight, meal) {
             const product = { name, calsPer100g, weight, cals: Math.round((calsPer100g / 100) * weight) };
-            if (meal === 'breakfast') {
-                if (breakfastProducts.find(p => p.name === name)) {
-                    showToast('Уже в завтраке', 'info');
-                    return;
-                }
-                breakfastProducts.push(product);
+            const arr = meal === 'breakfast' ? breakfastProducts : dinnerProducts;
+            const existing = arr.find(p => p.name === name);
+            if (existing) {
+                existing.weight = weight;
+                existing.cals = product.cals;
             } else {
-                if (dinnerProducts.find(p => p.name === name)) {
-                    showToast('Уже в ужине', 'info');
-                    return;
-                }
-                dinnerProducts.push(product);
+                arr.push(product);
             }
             updateMealUI();
         }
@@ -767,6 +811,16 @@
             const arr = meal === 'breakfast' ? breakfastProducts : dinnerProducts;
             const idx = arr.findIndex(p => p.name === name);
             if (idx > -1) arr.splice(idx, 1);
+            updateMealUI();
+        }
+        
+        function updateProductWeight(name, meal, weight) {
+            const arr = meal === 'breakfast' ? breakfastProducts : dinnerProducts;
+            const p = arr.find(pr => pr.name === name);
+            if (p) {
+                p.weight = parseInt(weight) || 0;
+                p.cals = Math.round((p.calsPer100g / 100) * p.weight);
+            }
             updateMealUI();
         }
         
@@ -797,6 +851,10 @@
                     <div class="flex justify-between items-center glass px-2 py-1 rounded text-xs">
                         <span>${p.name}</span>
                         <div class="flex items-center gap-2">
+                            <input type="number" value="${p.weight}" min="1" max="2000"
+                                onchange="updateProductWeight('${p.name}', 'breakfast', this.value)"
+                                class="w-14 bg-white/10 border border-white/20 rounded px-1 py-0.5 text-center text-xs">
+                            <span class="text-gray-500">г</span>
                             <span class="text-orange-400">${p.cals} ккал</span>
                             <button onclick="removeMealProduct('${p.name}', 'breakfast')" class="text-gray-500 hover:text-white">&times;</button>
                         </div>
@@ -813,6 +871,10 @@
                     <div class="flex justify-between items-center glass px-2 py-1 rounded text-xs">
                         <span>${p.name}</span>
                         <div class="flex items-center gap-2">
+                            <input type="number" value="${p.weight}" min="1" max="2000"
+                                onchange="updateProductWeight('${p.name}', 'dinner', this.value)"
+                                class="w-14 bg-white/10 border border-white/20 rounded px-1 py-0.5 text-center text-xs">
+                            <span class="text-gray-500">г</span>
                             <span class="text-blue-400">${p.cals} ккал</span>
                             <button onclick="removeMealProduct('${p.name}', 'dinner')" class="text-gray-500 hover:text-white">&times;</button>
                         </div>
@@ -854,11 +916,11 @@
             document.getElementById('result-total').textContent = `~${totalCals} ккал`;
             
             let breakfastHtml = breakfastProducts.length > 0 
-                ? `<div class="text-sm"><span class="text-orange-400 font-medium">🍳 Завтрак:</span> ${breakfastProducts.map(p => `${p.name} (${p.cals})`).join(', ')}</div>`
+                ? `<div class="text-sm"><span class="text-orange-400 font-medium">🍳 Завтрак:</span> ${breakfastProducts.map(p => `${p.name} ${p.weight}г (${p.cals})`).join(', ')}</div>`
                 : '';
             
             let dinnerHtml = dinnerProducts.length > 0
-                ? `<div class="text-sm"><span class="text-blue-400 font-medium">🌙 Ужин:</span> ${dinnerProducts.map(p => `${p.name} (${p.cals})`).join(', ')}</div>`
+                ? `<div class="text-sm"><span class="text-blue-400 font-medium">🌙 Ужин:</span> ${dinnerProducts.map(p => `${p.name} ${p.weight}г (${p.cals})`).join(', ')}</div>`
                 : '';
             
             document.getElementById('result-breakfast').innerHTML = breakfastHtml;
