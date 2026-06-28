@@ -582,77 +582,99 @@
     <!-- Tips Section -->
     <section id="tips" class="py-16 px-6">
         <div class="max-w-7xl mx-auto">
-            <h2 class="text-3xl font-bold gradient-text text-center mb-10">Рекомендации по уходу</h2>
+            <h2 class="text-3xl font-bold gradient-text text-center mb-10">Уход за Арчибальдом</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <a href="https://vetband.ru/articles/dieta-dlya-sobak-posle-operatsii" target="_blank" class="glass-card rounded-3xl p-6 block card-link">
-                    <div class="w-14 h-14 rounded-2xl bg-green-500/20 flex items-center justify-center mb-4">
-                        <i class="fas fa-utensils text-green-400 text-xl"></i>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Чеклист -->
+                <div class="glass-card rounded-3xl p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold flex items-center gap-2">
+                            <i class="fas fa-clipboard-list text-green-400"></i>Чеклист
+                        </h3>
+                        <select id="checklist-filter" onchange="filterChecklist()" class="text-xs bg-white/10 border border-white/20 rounded-lg px-2 py-1">
+                            <option value="all">Все</option>
+                            <option value="daily">Ежедневные</option>
+                            <option value="weekly">Еженедельные</option>
+                            <option value="monthly">Ежемесячные</option>
+                        </select>
                     </div>
-                    <h3 class="text-lg font-semibold mb-2">Диетическое питание</h3>
-                    <p class="text-sm text-gray-400 mb-3">Рекомендации по кормлению собак после операций и при заболеваниях ЖКТ</p>
-                    <span class="text-xs text-green-400 flex items-center gap-1">
-                        Подробнее <i class="fas fa-arrow-right"></i>
-                    </span>
-                </a>
+                    
+                    <div id="checklist-items" class="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+                        <!-- Filled by JS -->
+                    </div>
+                    
+                    <!-- Add custom task -->
+                    <div class="mt-4 flex gap-2">
+                        <input type="text" id="new-task-input" placeholder="Новая задача..." 
+                            class="flex-1 bg-white/5 border border-white/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-green-500"
+                            onkeypress="if(event.key==='Enter')addCustomTask()">
+                        <select id="new-task-frequency" class="bg-white/10 border border-white/20 rounded-xl px-2 text-xs">
+                            <option value="daily">Ежедневно</option>
+                            <option value="weekly">Еженедельно</option>
+                            <option value="monthly">Ежемесячно</option>
+                        </select>
+                        <button onclick="addCustomTask()" class="btn-ghost px-3">+</button>
+                    </div>
+                </div>
                 
-                <a href="https://www.royalcanin.com/ru/dogs/breeds/senior-dog" target="_blank" class="glass-card rounded-3xl p-6 block card-link">
-                    <div class="w-14 h-14 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-4">
-                        <i class="fas fa-heartbeat text-blue-400 text-xl"></i>
+                <!-- Напоминания -->
+                <div class="glass-card rounded-3xl p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold flex items-center gap-2">
+                            <i class="fas fa-bell text-orange-400"></i>Напоминания
+                        </h3>
+                        <button onclick="openModal('reminder-modal')" class="btn-ghost text-xs flex items-center gap-1">
+                            <i class="fas fa-plus"></i>Добавить
+                        </button>
                     </div>
-                    <h3 class="text-lg font-semibold mb-2">Уход за пожилыми собаками</h3>
-                    <p class="text-sm text-gray-400 mb-3">Особенности содержания и питания собак старше 10 лет</p>
-                    <span class="text-xs text-blue-400 flex items-center gap-1">
-                        Подробнее <i class="fas fa-arrow-right"></i>
-                    </span>
-                </a>
-                
-                <a href="https://vetmag.ru/diseases/diseases-sobak/artrit-u-sobak/" target="_blank" class="glass-card rounded-3xl p-6 block card-link">
-                    <div class="w-14 h-14 rounded-2xl bg-purple-500/20 flex items-center justify-center mb-4">
-                        <i class="fas fa-paw text-purple-400 text-xl"></i>
+                    
+                    <div id="reminder-list" class="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+                        <!-- Filled by JS -->
                     </div>
-                    <h3 class="text-lg font-semibold mb-2">Проблемы с суставами</h3>
-                    <p class="text-sm text-gray-400 mb-3">Профилактика и лечение артрита у собак крупных пород</p>
-                    <span class="text-xs text-purple-400 flex items-center gap-1">
-                        Подробнее <i class="fas fa-arrow-right"></i>
-                    </span>
-                </a>
-                
-                <a href="https://www.proplan.ru/dog/article/pravilnoe-pitanie-sobaki/" target="_blank" class="glass-card rounded-3xl p-6 block card-link">
-                    <div class="w-14 h-14 rounded-2xl bg-orange-500/20 flex items-center justify-center mb-4">
-                        <i class="fas fa-chart-simple text-orange-400 text-xl"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold mb-2">Контроль веса</h3>
-                    <p class="text-sm text-gray-400 mb-3">Как поддерживать оптимальный вес у собаки</p>
-                    <span class="text-xs text-orange-400 flex items-center gap-1">
-                        Подробнее <i class="fas fa-arrow-right"></i>
-                    </span>
-                </a>
-                
-                <a href="https://zverivdom.com/article/kak-chasto-guliat-s-sobakoy" target="_blank" class="glass-card rounded-3xl p-6 block card-link">
-                    <div class="w-14 h-14 rounded-2xl bg-yellow-500/20 flex items-center justify-center mb-4">
-                        <i class="fas fa-walking text-yellow-400 text-xl"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold mb-2">Режим прогулок</h3>
-                    <p class="text-sm text-gray-400 mb-3">Оптимальная продолжительность и частота прогулок</p>
-                    <span class="text-xs text-yellow-400 flex items-center gap-1">
-                        Подробнее <i class="fas fa-arrow-right"></i>
-                    </span>
-                </a>
-                
-                <a href="https://veterinar56.ru/statiya-o-psakh/chem-lechit-pochki-u-sobaki" target="_blank" class="glass-card rounded-3xl p-6 block card-link">
-                    <div class="w-14 h-14 rounded-2xl bg-red-500/20 flex items-center justify-center mb-4">
-                        <i class="fas fa-kidney text-red-400 text-xl"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold mb-2">Почечные заболевания</h3>
-                    <p class="text-sm text-gray-400 mb-3">Профилактика и раннее выявление проблем с почками</p>
-                    <span class="text-xs text-red-400 flex items-center gap-1">
-                        Подробнее <i class="fas fa-arrow-right"></i>
-                    </span>
-                </a>
+                </div>
             </div>
         </div>
     </section>
+    
+    <!-- Reminder Modal -->
+    <div id="reminder-modal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="modal-content glass-card rounded-3xl p-6 w-full max-w-sm">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">Новое напоминание</h3>
+                <button onclick="closeModal('reminder-modal')" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-3">
+                <input type="text" id="reminder-title" placeholder="Название (напр. Глистогонка)" 
+                    class="w-full bg-white/5 border border-white/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-500">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-xs text-gray-500">Периодичность</label>
+                        <select id="reminder-interval" class="w-full bg-white/5 border border-white/20 rounded-xl px-3 py-2 text-sm mt-1">
+                            <option value="7">Раз в неделю</option>
+                            <option value="30" selected>Раз в месяц</option>
+                            <option value="90">Раз в 3 месяца</option>
+                            <option value="180">Раз в полгода</option>
+                            <option value="365">Раз в год</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500">Последняя дата</label>
+                        <input type="date" id="reminder-last-date" 
+                            class="w-full bg-white/5 border border-white/20 rounded-xl px-3 py-2 text-sm mt-1 focus:outline-none focus:border-orange-500">
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-2">
+                    <input type="text" id="reminder-note" placeholder="Заметка (опц.)" 
+                        class="flex-1 bg-white/5 border border-white/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-orange-500">
+                </div>
+                <button onclick="saveReminderItem()" class="w-full py-2 bg-orange-500 rounded-xl font-semibold hover:bg-orange-600">
+                    Сохранить
+                </button>
+            </div>
+        </div>
+    </div>
 
     <footer class="py-8 px-6 border-t border-white/10">
         <div class="max-w-7xl mx-auto text-center">
@@ -759,9 +781,19 @@
     <script>
         const breakfastProducts = [];
         const dinnerProducts = [];
-        const MIN_CALS = 800;
-        const MAX_CALS = 1000;
+        let MIN_CALS = 800;
+        let MAX_CALS = 1000;
         let pendingProduct = null;
+        
+        function getCalorieRange() {
+            const saved = localStorage.getItem('archie-settings');
+            if (saved) {
+                const s = JSON.parse(saved);
+                const base = s.dailyCals || 870;
+                MIN_CALS = Math.round(base * 0.85);
+                MAX_CALS = Math.round(base * 1.1);
+            }
+        }
         
         function showWeightInput(name, calsPer100g, meal) {
             pendingProduct = { name, calsPer100g, meal };
@@ -834,6 +866,8 @@
         }
         
         function updateMealUI() {
+            getCalorieRange();
+            
             const breakfastCals = breakfastProducts.reduce((s, p) => s + p.cals, 0);
             const dinnerCals = dinnerProducts.reduce((s, p) => s + p.cals, 0);
             const totalCals = breakfastCals + dinnerCals;
@@ -932,6 +966,259 @@
         
         function saveMeal() {
             showToast('Меню сохранено!', 'success');
+        }
+        
+        // Settings
+        function saveSettings() {
+            const settings = {
+                name: document.getElementById('setting-name').value || 'Арчибальд',
+                age: parseInt(document.getElementById('setting-age').value) || 12,
+                weight: parseFloat(document.getElementById('setting-weight').value) || 21.5,
+                dailyCals: parseInt(document.getElementById('setting-cals').value) || 870
+            };
+            localStorage.setItem('archie-settings', JSON.stringify(settings));
+            closeModal('settings-modal');
+            showToast('Настройки сохранены!', 'success');
+        }
+        
+        function loadSettings() {
+            const saved = localStorage.getItem('archie-settings');
+            if (saved) {
+                const s = JSON.parse(saved);
+                document.getElementById('setting-name').value = s.name || 'Арчибальд';
+                document.getElementById('setting-age').value = s.age || 12;
+                document.getElementById('setting-weight').value = s.weight || 21.5;
+                document.getElementById('setting-cals').value = s.dailyCals || 870;
+            }
+        }
+        
+        // Load settings on init
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+            initChecklist();
+            initReminders();
+        });
+        
+        // === CHECKLIST ===
+        const defaultTasks = [
+            { id: 1, text: 'Утреннее кормление', freq: 'daily', done: false },
+            { id: 2, text: 'Вечернее кормление', freq: 'daily', done: false },
+            { id: 3, text: 'Прогулка', freq: 'daily', done: false },
+            { id: 4, text: 'Чистка зубов', freq: 'daily', done: false },
+            { id: 5, text: 'Проверить воду', freq: 'daily', done: false },
+            { id: 6, text: 'Расчёсывание', freq: 'weekly', done: false },
+            { id: 7, text: 'Обрезка когтей', freq: 'weekly', done: false },
+            { id: 8, text: 'Чистка ушей', freq: 'weekly', done: false },
+            { id: 9, text: 'Ветеринарный осмотр', freq: 'monthly', done: false },
+            { id: 10, text: 'Анализ крови', freq: 'monthly', done: false },
+            { id: 11, text: 'Купание', freq: 'monthly', done: false },
+        ];
+        
+        let checklistTasks = [];
+        
+        function initChecklist() {
+            const saved = localStorage.getItem('archie-checklist');
+            checklistTasks = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultTasks));
+            renderChecklist();
+        }
+        
+        function saveChecklist() {
+            localStorage.setItem('archie-checklist', JSON.stringify(checklistTasks));
+        }
+        
+        function renderChecklist(filter = 'all') {
+            const container = document.getElementById('checklist-items');
+            const filtered = filter === 'all' ? checklistTasks : checklistTasks.filter(t => t.freq === filter);
+            
+            if (filtered.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Нет задач в этой категории</p>';
+                return;
+            }
+            
+            const freqLabels = { daily: '📅 Ежедневно', weekly: '📆 Еженедельно', monthly: '🗓️ Ежемесячно' };
+            const freqColors = { daily: 'text-orange-400', weekly: 'text-blue-400', monthly: 'text-purple-400' };
+            
+            let html = '';
+            let currentFreq = '';
+            
+            filtered.forEach(task => {
+                if (task.freq !== currentFreq) {
+                    currentFreq = task.freq;
+                    html += `<div class="text-xs font-medium ${freqColors[currentFreq]} mt-3 mb-1 first:mt-0">${freqLabels[currentFreq]}</div>`;
+                }
+                
+                html += `
+                    <div class="flex items-center gap-3 glass px-3 py-2 rounded-xl ${task.done ? 'opacity-50' : ''}">
+                        <div class="toggle ${task.done ? 'active' : ''}" onclick="toggleTask(${task.id})"></div>
+                        <span class="flex-1 text-sm ${task.done ? 'line-through text-gray-500' : ''}">${task.text}</span>
+                        <button onclick="deleteTask(${task.id})" class="text-gray-600 hover:text-red-400 text-xs">&times;</button>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function filterChecklist() {
+            const filter = document.getElementById('checklist-filter').value;
+            renderChecklist(filter);
+        }
+        
+        function toggleTask(id) {
+            const task = checklistTasks.find(t => t.id === id);
+            if (task) {
+                task.done = !task.done;
+                saveChecklist();
+                renderChecklist(document.getElementById('checklist-filter').value);
+            }
+        }
+        
+        function deleteTask(id) {
+            checklistTasks = checklistTasks.filter(t => t.id !== id);
+            saveChecklist();
+            renderChecklist(document.getElementById('checklist-filter').value);
+        }
+        
+        function addCustomTask() {
+            const input = document.getElementById('new-task-input');
+            const select = document.getElementById('new-task-frequency');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            const newTask = {
+                id: Date.now(),
+                text: text,
+                freq: select.value,
+                done: false
+            };
+            
+            checklistTasks.push(newTask);
+            saveChecklist();
+            input.value = '';
+            renderChecklist(document.getElementById('checklist-filter').value);
+            showToast('Задача добавлена!', 'success');
+        }
+        
+        // === REMINDERS ===
+        let reminders = [];
+        
+        function initReminders() {
+            const saved = localStorage.getItem('archie-reminders');
+            reminders = saved ? JSON.parse(saved) : [
+                { id: 1, title: 'Глистогонка', interval: 90, lastDate: null, note: 'После еды' },
+                { id: 2, title: 'Прививка', interval: 365, lastDate: null, note: '' },
+            ];
+            renderReminders();
+        }
+        
+        function saveReminders() {
+            localStorage.setItem('archie-reminders', JSON.stringify(reminders));
+        }
+        
+        function renderReminders() {
+            const container = document.getElementById('reminder-list');
+            const today = new Date();
+            
+            if (reminders.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Нет напоминаний</p>';
+                return;
+            }
+            
+            let html = reminders.map(r => {
+                const nextDate = r.lastDate 
+                    ? new Date(new Date(r.lastDate).getTime() + r.interval * 24 * 60 * 60 * 1000)
+                    : null;
+                
+                const daysUntil = nextDate ? Math.ceil((nextDate - today) / (24 * 60 * 60 * 1000)) : null;
+                
+                let statusColor = 'text-gray-500';
+                let statusText = '—';
+                let urgent = false;
+                
+                if (daysUntil !== null) {
+                    if (daysUntil < 0) {
+                        statusColor = 'text-red-400';
+                        statusText = 'Просрочено';
+                        urgent = true;
+                    } else if (daysUntil <= 7) {
+                        statusColor = 'text-orange-400';
+                        statusText = `Через ${daysUntil} дн.`;
+                    } else {
+                        statusColor = 'text-green-400';
+                        statusText = `Через ${daysUntil} дн.`;
+                    }
+                }
+                
+                const intervalLabel = r.interval === 7 ? 'нед' : r.interval === 30 ? 'мес' : r.interval === 90 ? '3 мес' : r.interval === 180 ? '6 мес' : 'год';
+                
+                return `
+                    <div class="glass px-3 py-3 rounded-xl ${urgent ? 'border border-red-500/30' : ''}">
+                        <div class="flex justify-between items-start mb-1">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-bell text-orange-400 text-xs"></i>
+                                <span class="font-medium text-sm">${r.title}</span>
+                            </div>
+                            <button onclick="deleteReminder(${r.id})" class="text-gray-600 hover:text-red-400 text-xs">&times;</button>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-gray-500">${intervalLabel}</span>
+                            <span class="${statusColor} font-medium">${statusText}</span>
+                        </div>
+                        ${r.note ? `<div class="text-xs text-gray-600 mt-1">${r.note}</div>` : ''}
+                        <button onclick="markReminderDone(${r.id})" class="mt-2 w-full py-1 btn-ghost text-xs rounded-lg">
+                            Отметить выполненным
+                        </button>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+        
+        function saveReminderItem() {
+            const title = document.getElementById('reminder-title').value.trim();
+            const interval = parseInt(document.getElementById('reminder-interval').value);
+            const lastDate = document.getElementById('reminder-last-date').value || null;
+            const note = document.getElementById('reminder-note').value.trim();
+            
+            if (!title) {
+                showToast('Введите название', 'error');
+                return;
+            }
+            
+            reminders.push({
+                id: Date.now(),
+                title,
+                interval,
+                lastDate,
+                note
+            });
+            
+            saveReminders();
+            renderReminders();
+            closeModal('reminder-modal');
+            
+            document.getElementById('reminder-title').value = '';
+            document.getElementById('reminder-note').value = '';
+            document.getElementById('reminder-last-date').value = '';
+            
+            showToast('Напоминание добавлено!', 'success');
+        }
+        
+        function markReminderDone(id) {
+            const r = reminders.find(rem => rem.id === id);
+            if (r) {
+                r.lastDate = new Date().toISOString().split('T')[0];
+                saveReminders();
+                renderReminders();
+                showToast('Отмечено!', 'success');
+            }
+        }
+        
+        function deleteReminder(id) {
+            reminders = reminders.filter(r => r.id !== id);
+            saveReminders();
+            renderReminders();
         }
         
         function toggleReminder(el) {
