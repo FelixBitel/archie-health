@@ -802,17 +802,56 @@
             document.getElementById('generatedRecipe').classList.add('hidden');
         }
 
+        function buildDishName(components) {
+            const protein = components.filter(c => c.cat === 'белок').map(c => c.name);
+            const carb = components.filter(c => c.cat === 'углевод').map(c => c.name);
+            const veg = components.filter(c => c.cat === 'овощ').map(c => c.name);
+            const dairy = components.filter(c => c.cat === 'молочное').map(c => c.name);
+            const fruit = components.filter(c => c.cat === 'фрукт').map(c => c.name);
+
+            if (dairy.length > 0 && protein.length > 0) return `Запеканка ${protein[0]} с ${dairy[0]}`;
+            if (carb.length > 0 && protein.length > 0 && veg.length > 0) return `Рагу ${protein[0]} с ${carb[0]} и ${veg[0]}`;
+            if (carb.length > 0 && protein.length > 0) return `Каша ${protein[0]} с ${carb[0]}`;
+            if (veg.length > 0 && protein.length > 0) return `Пюре ${protein[0]} с ${veg[0]}`;
+            if (dairy.length > 0) return `Смузи с ${dairy.join(' и ')}`;
+            if (fruit.length > 0 && dairy.length > 0) return `Фруктовое пюре с ${dairy[0]}`;
+            if (fruit.length > 0 && protein.length > 0) return `Микс ${fruit[0]} и ${protein[0]}`;
+            if (protein.length > 0 && veg.length > 0) return `Котлеты ${protein[0]} с ${veg[0]}`;
+            return `Блюдо: ${components.map(c => c.name).join(' + ')}`;
+        }
+
+        function buildDishDesc(components) {
+            const protein = components.filter(c => c.cat === 'белок');
+            const carb = components.filter(c => c.cat === 'углевод');
+            const veg = components.filter(c => c.cat === 'овощ');
+            const parts = [];
+            if (protein.length) parts.push(`белок: ${protein.map(c => c.name).join(', ')}`);
+            if (carb.length) parts.push(`углеводы: ${carb.map(c => c.name).join(', ')}`);
+            if (veg.length) parts.push(`овощи: ${veg.map(c => c.name).join(', ')}`);
+            const proteinCal = protein.reduce((s, c) => s + c.cals, 0);
+            const weight = protein.reduce((s, c) => s + parseInt(c.unit), 0) || 0;
+            return `Сбалансированное блюдо · ${parts.join(' · ')} · ~${weight}г`;
+        }
+
         function generateRecipe() {
             if (selected.length < 2) {
                 alert('Выберите минимум 2 компонента!');
                 return;
             }
-            
-            const total = selected.reduce((sum, name) => sum + components[name].cals, 0);
-            const recipe = recipes[Math.floor(Math.random() * recipes.length)];
-            
-            document.getElementById('recipeName').textContent = recipe.name;
-            document.getElementById('recipeDesc').textContent = recipe.desc + ' Компоненты: ' + selected.join(' + ');
+
+            const comps = selected.map(name => ({
+                name,
+                cals: components[name].cals,
+                unit: components[name].unit,
+                cat: components[name].cat
+            }));
+            const total = comps.reduce((sum, c) => sum + c.cals, 0);
+
+            const name = buildDishName(comps);
+            const desc = buildDishDesc(comps);
+
+            document.getElementById('recipeName').textContent = name;
+            document.getElementById('recipeDesc').textContent = desc;
             document.getElementById('recipeCals').textContent = `${total} ккал (${selected.map(n => `${n} ${components[n].unit}`).join(', ')})`;
             document.getElementById('generatedRecipe').classList.remove('hidden');
         }
