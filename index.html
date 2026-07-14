@@ -802,35 +802,58 @@
             document.getElementById('generatedRecipe').classList.add('hidden');
         }
 
-        function buildDishName(components) {
-            const protein = components.filter(c => c.cat === 'белок').map(c => c.name);
-            const carb = components.filter(c => c.cat === 'углевод').map(c => c.name);
-            const veg = components.filter(c => c.cat === 'овощ').map(c => c.name);
-            const dairy = components.filter(c => c.cat === 'молочное').map(c => c.name);
-            const fruit = components.filter(c => c.cat === 'фрукт').map(c => c.name);
+        // Рецепты из одобренного списка
+        const recipeMap = {
+            'Курица,Рис,Морковь': { name: 'Диетическое куриное рагу', desc: 'Нежная курица с овощами на пару. Идеально для чувствительного ЖКТ.', portions: { 'Курица': '150г', 'Рис': '100г', 'Морковь': '50г', 'Кабачок': '30г' } },
+            'Курица,Гречка,Тыква': { name: 'Тыквенная каша с мясом', desc: 'Тыква помогает пищеварению, курица даёт белок.', portions: { 'Курица': '150г', 'Гречка': '100г', 'Тыква': '50г' } },
+            'Говядина,Гречка': { name: 'Говядина с гречкой', desc: 'Гипоаллергенное блюдо с говядиной и гречкой для стабильного пищеварения.', portions: { 'Говядина': '150г', 'Гречка': '100г' } },
+            'Печень куриная,Морковь': { name: 'Печёночный паштет', desc: 'Нежная куриная печень с морковью — богато витаминами A и B12.', portions: { 'Печень куриная': '80г', 'Морковь': '30г' } },
+            'Курица,Овсянка': { name: 'Овсяно-куриная каша', desc: 'Нежная овсянка с курицей — мягкое и питательное блюдо.', portions: { 'Курица': '100г', 'Овсянка': '50г' } },
+            'Творог,Курица': { name: 'Творожно-мясная запеканка', desc: 'Лёгкая запеканка с низким содержанием жира и высоким содержанием белка.', portions: { 'Курица': '100г', 'Творог': '80г' } },
+            'Говядина,Рис': { name: 'Рисовая каша с говядиной', desc: 'Рис с нежирной говядиной — классика диетического питания.', portions: { 'Говядина': '150г', 'Рис': '100г' } },
+            'Курица,Кабачок': { name: 'Кабачково-куриные котлеты', desc: 'Нежные котлеты на пару с минимумом жира.', portions: { 'Курица': '150г', 'Кабачок': '80г' } },
+            'Печень куриная,Гречка': { name: 'Гречневая каша с печенью', desc: 'Гречка с куриной печенью — богатый источник железа.', portions: { 'Печень куриная': '80г', 'Гречка': '100г' } },
+            'Кефир,Овсянка': { name: 'Кефирная каша', desc: 'Нежная каша на кефире для улучшения микрофлоры кишечника.', portions: { 'Овсянка': '50г', 'Кефир': '100мл' } },
+            'Яблоко,Курица': { name: 'Яблочно-мясное пюре', desc: 'Нежное пюре с яблоком — источник пектина и витаминов.', portions: { 'Курица': '100г', 'Яблоко': '50г' } },
+            'Курица,Рис,Кабачок': { name: 'Диетическое куриное рагу', desc: 'Нежная курица с овощами на пару. Идеально для чувствительного ЖКТ.', portions: { 'Курица': '150г', 'Рис': '100г', 'Кабачок': '50г' } }
+        };
 
-            if (dairy.length > 0 && protein.length > 0) return `Запеканка ${protein[0]} с ${dairy[0]}`;
-            if (carb.length > 0 && protein.length > 0 && veg.length > 0) return `Рагу ${protein[0]} с ${carb[0]} и ${veg[0]}`;
-            if (carb.length > 0 && protein.length > 0) return `Каша ${protein[0]} с ${carb[0]}`;
-            if (veg.length > 0 && protein.length > 0) return `Пюре ${protein[0]} с ${veg[0]}`;
-            if (dairy.length > 0) return `Смузи с ${dairy.join(' и ')}`;
-            if (fruit.length > 0 && dairy.length > 0) return `Фруктовое пюре с ${dairy[0]}`;
-            if (fruit.length > 0 && protein.length > 0) return `Микс ${fruit[0]} и ${protein[0]}`;
-            if (protein.length > 0 && veg.length > 0) return `Котлеты ${protein[0]} с ${veg[0]}`;
-            return `Блюдо: ${components.map(c => c.name).join(' + ')}`;
+        function findRecipe(selected) {
+            const sorted = selected.slice().sort();
+            // точные комбинации
+            for (let i = sorted.length; i >= 2; i--) {
+                for (let combo of combinations(sorted, i)) {
+                    const key = combo.join(',');
+                    if (recipeMap[key]) return { key, ...recipeMap[key] };
+                }
+            }
+            return null;
         }
 
-        function buildDishDesc(components) {
-            const protein = components.filter(c => c.cat === 'белок');
-            const carb = components.filter(c => c.cat === 'углевод');
-            const veg = components.filter(c => c.cat === 'овощ');
-            const parts = [];
-            if (protein.length) parts.push(`белок: ${protein.map(c => c.name).join(', ')}`);
-            if (carb.length) parts.push(`углеводы: ${carb.map(c => c.name).join(', ')}`);
-            if (veg.length) parts.push(`овощи: ${veg.map(c => c.name).join(', ')}`);
-            const proteinCal = protein.reduce((s, c) => s + c.cals, 0);
-            const weight = protein.reduce((s, c) => s + parseInt(c.unit), 0) || 0;
-            return `Сбалансированное блюдо · ${parts.join(' · ')} · ~${weight}г`;
+        function combinations(arr, k) {
+            if (k === 1) return arr.map(x => [x]);
+            if (k === arr.length) return [arr];
+            const result = [];
+            for (let i = 0; i <= arr.length - k; i++) {
+                for (let rest of combinations(arr.slice(i + 1), k - 1)) {
+                    result.push([arr[i], ...rest]);
+                }
+            }
+            return result;
+        }
+
+        function scaleCals(name, cals) {
+            // масштабируем калории под порцию из recipeMap
+            const portions = {
+                'Курица': { base: 45, portion: 150 }, 'Говядина': { base: 50, portion: 150 },
+                'Рис': { base: 30, portion: 100 }, 'Гречка': { base: 30, portion: 100 },
+                'Морковь': { base: 5, portion: 50 }, 'Тыква': { base: 5, portion: 50 },
+                'Кабачок': { base: 3, portion: 50 }, 'Яблоко': { base: 10, portion: 50 },
+                'Творог': { base: 15, portion: 50 }, 'Кефир': { base: 8, portion: 100 },
+                'Печень куриная': { base: 35, portion: 80 }, 'Овсянка': { base: 25, portion: 50 }
+            };
+            const p = portions[name] || { base: cals, portion: 100 };
+            return Math.round((cals / p.base) * p.portion);
         }
 
         function generateRecipe() {
@@ -839,21 +862,42 @@
                 return;
             }
 
-            const comps = selected.map(name => ({
-                name,
-                cals: components[name].cals,
-                unit: components[name].unit,
-                cat: components[name].cat
-            }));
-            const total = comps.reduce((sum, c) => sum + c.cals, 0);
+            const recipe = findRecipe(selected);
 
-            const name = buildDishName(comps);
-            const desc = buildDishDesc(comps);
+            if (recipe) {
+                document.getElementById('recipeName').textContent = recipe.name;
+                document.getElementById('recipeDesc').textContent = recipe.desc;
+                const total = Object.entries(recipe.portions)
+                    .filter(([k]) => selected.includes(k))
+                    .reduce((s, [k, v]) => s + Math.round(components[k].cals * (parseInt(v) / parseInt(components[k].unit))), 0);
+                document.getElementById('recipeCals').textContent = `${total} ккал`;
+                document.getElementById('generatedRecipe').classList.remove('hidden');
+            } else {
+                const protein = selected.filter(n => components[n].cat === 'белок');
+                const carb = selected.filter(n => components[n].cat === 'углевод');
+                const veg = selected.filter(n => components[n].cat === 'овощ');
+                const dairy = selected.filter(n => components[n].cat === 'молочное');
+                const fruit = selected.filter(n => components[n].cat === 'фрукт');
 
-            document.getElementById('recipeName').textContent = name;
-            document.getElementById('recipeDesc').textContent = desc;
-            document.getElementById('recipeCals').textContent = `${total} ккал (${selected.map(n => `${n} ${components[n].unit}`).join(', ')})`;
-            document.getElementById('generatedRecipe').classList.remove('hidden');
+                let name = 'Блюдо';
+                if (dairy.length && protein.length) name = `Запеканка ${protein[0]} с ${dairy[0]}`;
+                else if (carb.length && protein.length && veg.length) name = `Рагу ${protein[0]} с ${carb[0]} и ${veg[0]}`;
+                else if (carb.length && protein.length) name = `Каша ${protein[0]} с ${carb[0]}`;
+                else if (veg.length && protein.length) name = `Пюре ${protein[0]} с ${veg[0]}`;
+                else if (dairy.length) name = `Смузи с ${dairy.join(' и ')}`;
+                else if (fruit.length && dairy.length) name = `Фруктовое пюре с ${dairy[0]}`;
+                else if (fruit.length && protein.length) name = `Микс ${fruit[0]} и ${protein[0]}`;
+                else if (protein.length && veg.length) name = `Котлеты ${protein[0]} с ${veg[0]}`;
+                else name = `Блюдо: ${selected.join(' + ')}`;
+
+                document.getElementById('recipeName').textContent = name;
+                document.getElementById('recipeDesc').textContent = 'Проверьте компоненты — это блюдо не в списке одобренных рецептов. Попробуйте другую комбинацию.';
+
+                const total = selected.reduce((s, n) => s + components[n].cals, 0);
+                const parts = selected.map(n => `${n} ${components[n].unit}`).join(', ');
+                document.getElementById('recipeCals').textContent = `~${total} ккал (${parts})`;
+                document.getElementById('generatedRecipe').classList.remove('hidden');
+            }
         }
 
         // Плавный скролл
