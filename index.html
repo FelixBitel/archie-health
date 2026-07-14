@@ -396,87 +396,32 @@
                         </div>
                     </div>
                     
-                    <!-- Генератор блюд -->
+                    <!-- Генератор меню -->
                     <div class="border-t border-white/10 pt-6">
-                        <button id="toggleGenerator" class="w-full py-3 glass rounded-xl text-sm font-medium hover:bg-white/10 transition flex items-center justify-center gap-2 mb-4">
-                            <i class="fa-solid fa-wand-magic-sparkles text-orange-400"></i>
-                            Генератор диетических блюд
+                        <button id="toggleGenerator" onclick="toggleMenuGenerator()" class="w-full py-3 glass rounded-xl text-sm font-medium hover:bg-white/10 transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-calendar-days text-orange-400"></i>
+                            Меню на день
                         </button>
-                        
-                        <div id="mealGenerator" class="hidden">
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
-                                <button onclick="addComponent('Курица', 45, 'protein')" class="comp-btn glass px-3 py-2 rounded-lg text-xs hover:bg-orange-500/20 transition" data-cat="protein">
-                                    🍗 Курица
-                                </button>
-                                <button onclick="addComponent('Говядина', 50, 'protein')" class="comp-btn glass px-3 py-2 rounded-lg text-xs hover:bg-orange-500/20 transition" data-cat="protein">
-                                    🥩 Говядина
-                                </button>
-                                <button onclick="addComponent('Рис', 30, 'carb')" class="comp-btn glass px-3 py-2 rounded-lg text-xs hover:bg-orange-500/20 transition" data-cat="carb">
-                                    🍚 Рис
-                                </button>
-                                <button onclick="addComponent('Гречка', 30, 'carb')" class="comp-btn glass px-3 py-2 rounded-lg text-xs hover:bg-orange-500/20 transition" data-cat="carb">
-                                    🌾 Гречка
-                                </button>
-                                <button onclick="addComponent('Морковь', 5, 'veg')" class="comp-btn glass px-3 py-2 rounded-lg text-xs hover:bg-orange-500/20 transition" data-cat="veg">
-                                    🥕 Морковь
-                                </button>
-                                <button onclick="addComponent('Тыква', 5, 'veg')" class="comp-btn glass px-3 py-2 rounded-lg text-xs hover:bg-orange-500/20 transition" data-cat="veg">
-                                    🎃 Тыква
-                                </button>
-                                <button onclick="addComponent('Кабачок', 3, 'veg')" class="comp-btn glass px-3 py-2 rounded-lg text-xs hover:bg-orange-500/20 transition" data-cat="veg">
-                                    🥒 Кабачок
-                                </button>
-                                <button onclick="addComponent('Яблоко', 10, 'fruit')" class="comp-btn glass px-3 py-2 rounded-lg text-xs hover:bg-orange-500/20 transition" data-cat="fruit">
-                                    🍎 Яблоко
-                                </button>
-                                <button onclick="addComponent('Творог', 15, 'dairy')" class="comp-btn glass px-3 py-2 rounded-lg text-xs hover:bg-orange-500/20 transition" data-cat="dairy">
-                                    🧀 Творог
-                                </button>
-                                <button onclick="addComponent('Кефир', 8, 'dairy')" class="comp-btn glass px-3 py-2 rounded-lg text-xs hover:bg-orange-500/20 transition" data-cat="dairy">
-                                    🥛 Кефир
-                                </button>
-                                <button onclick="addComponent('Печень куриная', 35, 'protein')" class="comp-btn glass px-3 py-2 rounded-lg text-xs hover:bg-orange-500/20 transition" data-cat="protein">
-                                    🫘 Печень
-                                </button>
-                                <button onclick="addComponent('Овсянка', 25, 'carb')" class="comp-btn glass px-3 py-2 rounded-lg text-xs hover:bg-orange-500/20 transition" data-cat="carb">
-                                    🥣 Овсянка
-                                </button>
-                            </div>
-                            
-                            <!-- Выбранные компоненты -->
-                            <div class="glass p-4 rounded-xl mb-4 min-h-[80px]">
-                                <div class="text-xs text-gray-500 mb-2">Выбрано:</div>
-                                <div id="selectedComponents" class="flex flex-wrap gap-2">
-                                    <span class="text-sm text-gray-400">Нажмите на компоненты выше...</span>
+
+                        <div id="mealGenerator" class="hidden mt-4 space-y-4">
+                            <!-- Target info -->
+                            <div class="glass p-4 rounded-xl">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm text-gray-400">Целевая норма</span>
+                                    <span id="targetCals" class="font-bold text-orange-400">870 ккал</span>
                                 </div>
-                                <div class="mt-3 pt-3 border-t border-white/10 flex justify-between items-center">
-                                    <span class="text-sm text-gray-400">Итого:</span>
-                                    <span id="totalCalories" class="font-bold text-orange-400">0 ккал</span>
+                                <div class="flex gap-2">
+                                    <input type="range" id="calorieTarget" min="500" max="1200" value="870" class="flex-1 accent-orange-500" oninput="document.getElementById('targetCals').textContent = this.value + ' ккал'">
                                 </div>
                             </div>
-                            
-                            <div class="flex gap-3">
-                                <button onclick="generateRecipe()" class="flex-1 py-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl text-sm font-semibold hover:from-orange-600 hover:to-orange-700 transition flex items-center justify-center gap-2">
-                                    <i class="fas fa-sparkles"></i>Сгенерировать рецепт
-                                </button>
-                                <button onclick="clearComponents()" class="px-4 py-3 glass rounded-xl text-sm hover:bg-white/10 transition">
-                                    <i class="fas fa-trash text-gray-400"></i>
-                                </button>
-                            </div>
-                            
-                            <!-- Сгенерированный рецепт -->
-                            <div id="generatedRecipe" class="hidden mt-4 glass p-5 rounded-xl border border-green-500/30">
-                                <div class="flex items-center gap-2 mb-3">
-                                    <i class="fas fa-check-circle text-green-400"></i>
-                                    <span class="font-semibold text-green-400">Готовое блюдо</span>
-                                </div>
-                                <h4 id="recipeName" class="font-bold mb-2"></h4>
-                                <p id="recipeDesc" class="text-sm text-gray-400 mb-3"></p>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-400">Калорийность:</span>
-                                    <span id="recipeCals" class="font-semibold text-orange-400"></span>
-                                </div>
-                            </div>
+
+                            <!-- Generate button -->
+                            <button onclick="generateDayMenu()" class="w-full py-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl text-sm font-semibold hover:from-orange-600 hover:to-orange-700 transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-sparkles"></i>Сгенерировать меню
+                            </button>
+
+                            <!-- Generated Day Menu -->
+                            <div id="dayMenu" class="hidden space-y-3"></div>
                         </div>
                     </div>
                     
@@ -722,185 +667,243 @@
     </footer>
 
     <script>
-        // Генератор блюд
-        const selected = [];
-        const components = {
-            'Курица': { cals: 45, unit: '150г', cat: 'белок' },
-            'Говядина': { cals: 50, unit: '150г', cat: 'белок' },
-            'Рис': { cals: 30, unit: '100г', cat: 'углевод' },
-            'Гречка': { cals: 30, unit: '100г', cat: 'углевод' },
-            'Морковь': { cals: 5, unit: '50г', cat: 'овощ' },
-            'Тыква': { cals: 5, unit: '50г', cat: 'овощ' },
-            'Кабачок': { cals: 3, unit: '50г', cat: 'овощ' },
-            'Яблоко': { cals: 10, unit: '50г', cat: 'фрукт' },
-            'Творог': { cals: 15, unit: '50г', cat: 'молочное' },
-            'Кефир': { cals: 8, unit: '100мл', cat: 'молочное' },
-            'Печень куриная': { cals: 35, unit: '80г', cat: 'белок' },
-            'Овсянка': { cals: 25, unit: '50г', cat: 'углевод' }
+        // ─── Генератор меню на день ───
+        const COMPONENTS = {
+            'Курица':        { calsPer100g: 165, type: 'белок', emoji: '🍗' },
+            'Говядина':      { calsPer100g: 250, type: 'белок', emoji: '🥩' },
+            'Печень куриная':{ calsPer100g: 119, type: 'белок', emoji: '🫘' },
+            'Рис':           { calsPer100g: 130, type: 'углевод', emoji: '🍚' },
+            'Гречка':        { calsPer100g: 110, type: 'углевод', emoji: '🌾' },
+            'Овсянка':       { calsPer100g: 68,  type: 'углевод', emoji: '🥣' },
+            'Морковь':       { calsPer100g: 32,  type: 'овощ', emoji: '🥕' },
+            'Тыква':         { calsPer100g: 26,  type: 'овощ', emoji: '🎃' },
+            'Кабачок':       { calsPer100g: 17,  type: 'овощ', emoji: '🥒' },
+            'Яблоко':        { calsPer100g: 52,  type: 'фрукт', emoji: '🍎' },
+            'Творог':        { calsPer100g: 97,  type: 'молочное', emoji: '🧀' },
+            'Кефир':         { calsPer100g: 40,  type: 'молочное', emoji: '🥛' }
         };
 
-        const recipes = [
-            { name: 'Диетическое куриное рагу', desc: 'Нежная курица с овощами на пару. Идеально для чувствительного ЖКТ.' },
-            { name: 'Говядина с гречкой', desc: 'Гипоаллергенное блюдо с говядиной и гречкой для стабильного пищеварения.' },
-            { name: 'Печёночный паштет', desc: 'Нежная куриная печень с морковью — богато витаминами A и B12.' },
-            { name: 'Овсяно-куриная каша', desc: 'Нежная овсянка с курицей — мягкое и питательное блюдо.' },
-            { name: 'Тыквенная каша с мясом', desc: 'Тыква помогает пищеварению, курица даёт белок.' },
-            { name: 'Творожно-мясная запеканка', desc: 'Лёгкая запеканка с низким содержанием жира и высоким содержанием белка.' },
-            { name: 'Рисовая каша с говядиной', desc: 'Рис с нежирной говядиной — классика диетического питания.' },
-            { name: 'Кабачково-куриные котлеты', desc: 'Нежные котлеты на пару с минимумом жира.' },
-            { name: 'Гречневая каша с печенью', desc: 'Гречка с куриной печенью — богатый источник железа.' },
-            { name: 'Кефирная каша', desc: 'Нежная каша на кефире для улучшения микрофлоры кишечника.' },
-            { name: 'Яблочно-мясное пюре', desc: 'Нежное пюре с яблоком — источник пектина и витаминов.' },
-            { name: 'Морковно-рисовая каша', desc: 'Лёгкая рисовая каша с морковью для чувствительного пищеварения.' }
+        // Одобренные рецепты: name, emoji, portions{g: weightGrams, cals}, instructions
+        const APPROVED_MEALS = [
+            {
+                name: 'Диетическое куриное рагу',
+                emoji: '🍲',
+                type: 'lunch',
+                portions: { 'Курица': {g: 120}, 'Рис': {g: 80}, 'Морковь': {g: 50} },
+                instructions: 'Курицу нарезать кубиками, отварить до готовности. Рис промыть и сварить отдельно. Морковь натереть, добавить к курице, тушить 10 мин на медленном огне. Подавать тёплым.'
+            },
+            {
+                name: 'Говядина с гречкой',
+                emoji: '🥘',
+                type: ' lunch',
+                portions: { 'Говядина': {g: 120}, 'Гречка': {g: 80} },
+                instructions: 'Говядину отварить до мягкости (60-90 мин). Гречку промыть, залить бульоном 1:2, варить 20 мин. Мясо нарезать и подавать с кашей.'
+            },
+            {
+                name: 'Тыквенная каша с курицей',
+                emoji: '🎃',
+                type: ' dinner',
+                portions: { 'Курица': {g: 100}, 'Гречка': {g: 60}, 'Тыква': {g: 80} },
+                instructions: 'Курицу отварить. Тыкву нарезать кубиками, тушить с водой 10 мин. Добавить готовую гречку и курицу, перемешать, потомить 5 мин.'
+            },
+            {
+                name: 'Овсяно-куриная каша',
+                emoji: '🥣',
+                type: 'breakfast',
+                portions: { 'Курица': {g: 80}, 'Овсянка': {g: 50} },
+                instructions: 'Курицу отварить, мелко нарезать. Овсянку залить водой 1:2, варить 15 мин до мягкости. Добавить курицу, перемешать. Можно добавить немного бульона для мягкости.'
+            },
+            {
+                name: 'Творожно-мясная запеканка',
+                emoji: '🧁',
+                type: 'lunch',
+                portions: { 'Курица': {g: 100}, 'Творог': {g: 80} },
+                instructions: 'Курицу отварить и измельчить. Творог смешать с яйцом (½ шт), соединить с курицей. Выложить в форму, запекать при 180°C 25 мин.'
+            },
+            {
+                name: 'Рисовая каша с говядиной',
+                emoji: '🍚',
+                type: 'dinner',
+                portions: { 'Говядина': {g: 100}, 'Рис': {g: 80} },
+                instructions: 'Говядину отварить до мягкости. Рис промыть, залить бульоном, варить 20 мин. Мясо нарезать мелкими кусочками, добавить в кашу.'
+            },
+            {
+                name: 'Кабачково-куриные котлеты',
+                emoji: '🍳',
+                type: 'dinner',
+                portions: { 'Курица': {g: 120}, 'Кабачок': {g: 80} },
+                instructions: 'Курицу перекрутить. Кабачок натереть, отжать лишнюю жидкость. Смешать с курицей, добавить ½ яйца, немного соли. Формировать котлеты, готовить на пару 20 мин.'
+            },
+            {
+                name: 'Гречневая каша с печенью',
+                emoji: '🫘',
+                type: 'lunch',
+                portions: { 'Печень куриная': {g: 100}, 'Гречка': {g: 80} },
+                instructions: 'Печень промыть, обжарить 3-4 мин на сковороде. Гречку сварить. Печень нарезать, смешать с кашей. Можно добавить немного отвара для сочности.'
+            },
+            {
+                name: 'Кефирная каша',
+                emoji: '🥛',
+                type: 'breakfast',
+                portions: { 'Овсянка': {g: 50}, 'Кефир': {g: 150} },
+                instructions: 'Овсянку залить кипятком, дать настояться 10 мин. Залить кефиром комнатной температуры. Можно добавить кусочек яблока.'
+            },
+            {
+                name: 'Яблочно-мясное пюре',
+                emoji: '🫕',
+                type: 'lunch',
+                portions: { 'Курица': {g: 100}, 'Яблоко': {g: 60} },
+                instructions: 'Курицу отварить, измельчить в блендере. Яблоко запечь в духовке при 180°C 15 мин, протереть. Смешать пюре, подогреть до подачи.'
+            },
+            {
+                name: 'Печёночный паштет',
+                emoji: '🫕',
+                type: 'lunch',
+                portions: { 'Печень куриная': {g: 120}, 'Морковь': {g: 50} },
+                instructions: 'Печень промыть, отварить 15 мин. Морковь отварить до мягкости. Пропустить через блендер до однородности. Подавать охлаждённым с кусочком хлеба (5г).'
+            },
+            {
+                name: 'Говядина с овсянкой',
+                emoji: '🥘',
+                type: 'dinner',
+                portions: { 'Говядина': {g: 100}, 'Овсянка': {g: 60} },
+                instructions: 'Говядину отварить до мягкости. Овсянку залить бульоном, варить 15 мин. Мясо нарезать, смешать с кашей. Потушить вместе 5 мин.'
+            }
         ];
 
-        document.getElementById('toggleGenerator').addEventListener('click', () => {
-            const gen = document.getElementById('mealGenerator');
-            const btn = document.getElementById('toggleGenerator');
-            if (gen.classList.contains('hidden')) {
-                gen.classList.remove('hidden');
-                btn.innerHTML = '<i class="fas fa-chevron-up text-orange-400"></i>Скрыть генератор';
-            } else {
-                gen.classList.add('hidden');
-                btn.innerHTML = '<i class="fas fa-wand-magic-sparkles text-orange-400"></i>Генератор диетических блюд';
-            }
-        });
-
-        function addComponent(name, cals, cat) {
-            if (selected.includes(name)) return;
-            selected.push(name);
-            updateComponentsDisplay();
-        }
-
-        function removeComponent(name) {
-            const idx = selected.indexOf(name);
-            if (idx > -1) selected.splice(idx, 1);
-            updateComponentsDisplay();
-        }
-
-        function updateComponentsDisplay() {
-            const container = document.getElementById('selectedComponents');
-            if (selected.length === 0) {
-                container.innerHTML = '<span class="text-sm text-gray-400">Нажмите на компоненты выше...</span>';
-            } else {
-                container.innerHTML = selected.map(name => `
-                    <span class="glass px-3 py-1 rounded-lg text-xs flex items-center gap-1">
-                        ${components[name].cat === 'белок' ? '🍗' : components[name].cat === 'углевод' ? '🌾' : components[name].cat === 'овощ' ? '🥕' : components[name].cat === 'молочное' ? '🧀' : '🍎'}
-                        ${name}
-                        <button onclick="removeComponent('${name}')" class="ml-1 text-gray-400 hover:text-white">&times;</button>
-                    </span>
-                `).join('');
-            }
-            
-            const total = selected.reduce((sum, name) => sum + components[name].cals, 0);
-            document.getElementById('totalCalories').textContent = `${total} ккал`;
-        }
-
-        function clearComponents() {
-            selected.length = 0;
-            updateComponentsDisplay();
-            document.getElementById('generatedRecipe').classList.add('hidden');
-        }
-
-        // Рецепты из одобренного списка
-        const recipeMap = {
-            'Курица,Рис,Морковь': { name: 'Диетическое куриное рагу', desc: 'Нежная курица с овощами на пару. Идеально для чувствительного ЖКТ.', portions: { 'Курица': '150г', 'Рис': '100г', 'Морковь': '50г', 'Кабачок': '30г' } },
-            'Курица,Гречка,Тыква': { name: 'Тыквенная каша с мясом', desc: 'Тыква помогает пищеварению, курица даёт белок.', portions: { 'Курица': '150г', 'Гречка': '100г', 'Тыква': '50г' } },
-            'Говядина,Гречка': { name: 'Говядина с гречкой', desc: 'Гипоаллергенное блюдо с говядиной и гречкой для стабильного пищеварения.', portions: { 'Говядина': '150г', 'Гречка': '100г' } },
-            'Печень куриная,Морковь': { name: 'Печёночный паштет', desc: 'Нежная куриная печень с морковью — богато витаминами A и B12.', portions: { 'Печень куриная': '80г', 'Морковь': '30г' } },
-            'Курица,Овсянка': { name: 'Овсяно-куриная каша', desc: 'Нежная овсянка с курицей — мягкое и питательное блюдо.', portions: { 'Курица': '100г', 'Овсянка': '50г' } },
-            'Творог,Курица': { name: 'Творожно-мясная запеканка', desc: 'Лёгкая запеканка с низким содержанием жира и высоким содержанием белка.', portions: { 'Курица': '100г', 'Творог': '80г' } },
-            'Говядина,Рис': { name: 'Рисовая каша с говядиной', desc: 'Рис с нежирной говядиной — классика диетического питания.', portions: { 'Говядина': '150г', 'Рис': '100г' } },
-            'Курица,Кабачок': { name: 'Кабачково-куриные котлеты', desc: 'Нежные котлеты на пару с минимумом жира.', portions: { 'Курица': '150г', 'Кабачок': '80г' } },
-            'Печень куриная,Гречка': { name: 'Гречневая каша с печенью', desc: 'Гречка с куриной печенью — богатый источник железа.', portions: { 'Печень куриная': '80г', 'Гречка': '100г' } },
-            'Кефир,Овсянка': { name: 'Кефирная каша', desc: 'Нежная каша на кефире для улучшения микрофлоры кишечника.', portions: { 'Овсянка': '50г', 'Кефир': '100мл' } },
-            'Яблоко,Курица': { name: 'Яблочно-мясное пюре', desc: 'Нежное пюре с яблоком — источник пектина и витаминов.', portions: { 'Курица': '100г', 'Яблоко': '50г' } },
-            'Курица,Рис,Кабачок': { name: 'Диетическое куриное рагу', desc: 'Нежная курица с овощами на пару. Идеально для чувствительного ЖКТ.', portions: { 'Курица': '150г', 'Рис': '100г', 'Кабачок': '50г' } }
+        const MEAL_TIMES = {
+            breakfast: { name: '🍳 Завтрак', time: '08:00' },
+            lunch:     { name: '🥘 Обед',     time: '13:00' },
+            dinner:    { name: '🌙 Ужин',     time: '19:00' }
         };
 
-        function findRecipe(selected) {
-            const sorted = selected.slice().sort();
-            // точные комбинации
-            for (let i = sorted.length; i >= 2; i--) {
-                for (let combo of combinations(sorted, i)) {
-                    const key = combo.join(',');
-                    if (recipeMap[key]) return { key, ...recipeMap[key] };
+        function calcCals(ingredient, grams) {
+            return Math.round(COMPONENTS[ingredient].calsPer100g * grams / 100);
+        }
+
+        function shuffle(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function generateDayMenu() {
+            const target = parseInt(document.getElementById('calorieTarget').value);
+            const usedMeals = [];
+            const menu = { breakfast: null, lunch: null, dinner: null };
+            let totalCals = 0;
+
+            // Распределяем калории: завтрак 30%, обед 45%, ужин 25%
+            const targets = { breakfast: Math.round(target * 0.30), lunch: Math.round(target * 0.45), dinner: Math.round(target * 0.25) };
+
+            // Собираем меню по приёмам пищи
+            for (const type of ['breakfast', 'lunch', 'dinner']) {
+                const candidates = shuffle(APPROVED_MEALS.filter(m => m.type === type || m.type === 'lunch' && type === 'dinner'));
+
+                let best = null, bestDiff = Infinity;
+                for (const meal of candidates) {
+                    const cals = calcMealCals(meal);
+                    const diff = Math.abs(cals - targets[type]);
+                    if (diff < bestDiff) { bestDiff = diff; best = meal; }
+                }
+                if (!best) best = candidates[0];
+
+                // Если калории превышают цель, масштабируем порции
+                const cals = calcMealCals(best);
+                if (totalCals + cals > target + 50) {
+                    const scale = (target - totalCals) / cals;
+                    if (scale > 0.5) {
+                        const scaled = JSON.parse(JSON.stringify(best));
+                        for (const ing in scaled.portions) scaled.portions[ing].g = Math.round(scaled.portions[ing].g * scale);
+                        menu[type] = scaled;
+                        totalCals += calcMealCals(scaled);
+                    } else {
+                        menu[type] = best;
+                        totalCals += cals;
+                    }
+                } else {
+                    menu[type] = best;
+                    totalCals += cals;
                 }
             }
-            return null;
+
+            renderDayMenu(menu, totalCals, target);
         }
 
-        function combinations(arr, k) {
-            if (k === 1) return arr.map(x => [x]);
-            if (k === arr.length) return [arr];
-            const result = [];
-            for (let i = 0; i <= arr.length - k; i++) {
-                for (let rest of combinations(arr.slice(i + 1), k - 1)) {
-                    result.push([arr[i], ...rest]);
-                }
+        function calcMealCals(meal) {
+            return Object.entries(meal.portions).reduce((s, [ing, {g}]) => s + calcCals(ing, g), 0);
+        }
+
+        function renderDayMenu(menu, totalCals, target) {
+            const container = document.getElementById('dayMenu');
+            container.classList.remove('hidden');
+
+            let html = `
+                <div class="glass p-4 rounded-xl border border-green-500/30">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-400">Меню на день</span>
+                        <span class="text-sm font-bold ${Math.abs(totalCals - target) < 100 ? 'text-green-400' : 'text-orange-400'}">${totalCals} / ${target} ккал</span>
+                    </div>
+                    <div class="h-2 bg-gray-700/50 rounded-full overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full transition-all" style="width: ${Math.min(100, totalCals / target * 100)}%"></div>
+                    </div>
+                </div>`;
+
+            for (const [type, meal] of Object.entries(menu)) {
+                if (!meal) continue;
+                const time = MEAL_TIMES[type];
+                const mealCals = calcMealCals(meal);
+                const partsList = Object.entries(meal.portions).map(([ing, {g}]) =>
+                    `${COMPONENTS[ing].emoji} ${ing} ${g}г <span class="text-orange-400">(${calcCals(ing, g)} ккал)</span>`
+                ).join(', ');
+
+                html += `
+                <details class="glass p-4 rounded-xl border border-white/10" open>
+                    <summary class="flex items-center gap-3 cursor-pointer list-none font-semibold">
+                        <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center text-center leading-none text-lg">${meal.emoji}</div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <span>${time.name}</span>
+                                <span class="text-xs text-gray-500">${time.time}</span>
+                            </div>
+                            <div class="text-sm text-orange-400 font-normal">${mealCals} ккал</div>
+                        </div>
+                        <div class="text-xs text-gray-500">${meal.name}</div>
+                    </summary>
+                    <div class="mt-4 space-y-3">
+                        <div class="text-sm text-gray-300">
+                            <div class="mb-1 text-gray-500 text-xs uppercase tracking-wide">Компоненты:</div>
+                            ${Object.entries(meal.portions).map(([ing, {g}]) =>
+                                `<div class="flex justify-between"><span>${COMPONENTS[ing].emoji} ${ing}</span><span>${g}г (${calcCals(ing, g)} ккал)</span></div>`
+                            ).join('')}
+                        </div>
+                        <div class="text-sm text-gray-400 border-t border-white/10 pt-3">
+                            <div class="mb-1 text-gray-500 text-xs uppercase tracking-wide">Как готовить:</div>
+                            <p>${meal.instructions}</p>
+                        </div>
+                    </div>
+                </details>`;
             }
-            return result;
+
+            container.innerHTML = html;
         }
 
-        function scaleCals(name, cals) {
-            // масштабируем калории под порцию из recipeMap
-            const portions = {
-                'Курица': { base: 45, portion: 150 }, 'Говядина': { base: 50, portion: 150 },
-                'Рис': { base: 30, portion: 100 }, 'Гречка': { base: 30, portion: 100 },
-                'Морковь': { base: 5, portion: 50 }, 'Тыква': { base: 5, portion: 50 },
-                'Кабачок': { base: 3, portion: 50 }, 'Яблоко': { base: 10, portion: 50 },
-                'Творог': { base: 15, portion: 50 }, 'Кефир': { base: 8, portion: 100 },
-                'Печень куриная': { base: 35, portion: 80 }, 'Овсянка': { base: 25, portion: 50 }
-            };
-            const p = portions[name] || { base: cals, portion: 100 };
-            return Math.round((cals / p.base) * p.portion);
-        }
-
-        function generateRecipe() {
-            if (selected.length < 2) {
-                alert('Выберите минимум 2 компонента!');
-                return;
-            }
-
-            const recipe = findRecipe(selected);
-
-            if (recipe) {
-                document.getElementById('recipeName').textContent = recipe.name;
-                document.getElementById('recipeDesc').textContent = recipe.desc;
-                const total = Object.entries(recipe.portions)
-                    .filter(([k]) => selected.includes(k))
-                    .reduce((s, [k, v]) => s + Math.round(components[k].cals * (parseInt(v) / parseInt(components[k].unit))), 0);
-                document.getElementById('recipeCals').textContent = `${total} ккал`;
-                document.getElementById('generatedRecipe').classList.remove('hidden');
+        function toggleMenuGenerator() {
+            const el = document.getElementById('mealGenerator');
+            const btn = document.getElementById('toggleGenerator');
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+                btn.innerHTML = '<i class="fa-solid fa-chevron-up text-orange-400"></i>Скрыть меню';
             } else {
-                const protein = selected.filter(n => components[n].cat === 'белок');
-                const carb = selected.filter(n => components[n].cat === 'углевод');
-                const veg = selected.filter(n => components[n].cat === 'овощ');
-                const dairy = selected.filter(n => components[n].cat === 'молочное');
-                const fruit = selected.filter(n => components[n].cat === 'фрукт');
-
-                let name = 'Блюдо';
-                if (dairy.length && protein.length) name = `Запеканка ${protein[0]} с ${dairy[0]}`;
-                else if (carb.length && protein.length && veg.length) name = `Рагу ${protein[0]} с ${carb[0]} и ${veg[0]}`;
-                else if (carb.length && protein.length) name = `Каша ${protein[0]} с ${carb[0]}`;
-                else if (veg.length && protein.length) name = `Пюре ${protein[0]} с ${veg[0]}`;
-                else if (dairy.length) name = `Смузи с ${dairy.join(' и ')}`;
-                else if (fruit.length && dairy.length) name = `Фруктовое пюре с ${dairy[0]}`;
-                else if (fruit.length && protein.length) name = `Микс ${fruit[0]} и ${protein[0]}`;
-                else if (protein.length && veg.length) name = `Котлеты ${protein[0]} с ${veg[0]}`;
-                else name = `Блюдо: ${selected.join(' + ')}`;
-
-                document.getElementById('recipeName').textContent = name;
-                document.getElementById('recipeDesc').textContent = 'Проверьте компоненты — это блюдо не в списке одобренных рецептов. Попробуйте другую комбинацию.';
-
-                const total = selected.reduce((s, n) => s + components[n].cals, 0);
-                const parts = selected.map(n => `${n} ${components[n].unit}`).join(', ');
-                document.getElementById('recipeCals').textContent = `~${total} ккал (${parts})`;
-                document.getElementById('generatedRecipe').classList.remove('hidden');
+                el.classList.add('hidden');
+                btn.innerHTML = '<i class="fa-solid fa-calendar-days text-orange-400"></i>Меню на день';
             }
         }
 
-        // Плавный скролл
+        // ─── Плавный скролл ───
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 e.preventDefault();
