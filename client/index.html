@@ -771,6 +771,14 @@
                 updateComponentsList();
             }
         }
+
+        function adjustComponentWeight(name, delta) {
+            const comp = selectedComponents.find(c => c.name === name);
+            if (comp) {
+                comp.weight = Math.max(5, (comp.weight || 0) + delta);
+                updateComponentsList();
+            }
+        }
         
         function removeComponent(name) {
             const idx = selectedComponents.findIndex(c => c.name === name);
@@ -801,9 +809,15 @@
                             <span class="text-sm">${c.name}</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <input type="number" value="${c.weight}" 
-                                onchange="updateComponentWeight('${c.name}', this.value)"
-                                class="w-16 bg-white/10 border border-white/20 rounded px-2 py-1 text-xs text-center">
+                            <div class="flex items-center gap-1">
+                                <button onclick="adjustComponentWeight('${c.name}', -5)" 
+                                    class="w-6 h-6 flex items-center justify-center rounded bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white transition-all text-xs font-bold select-none" title="−5г">▼</button>
+                                <input type="number" value="${c.weight}" 
+                                    onchange="updateComponentWeight('${c.name}', this.value)"
+                                    class="w-14 bg-white/10 border border-white/20 rounded px-2 py-1 text-xs text-center">
+                                <button onclick="adjustComponentWeight('${c.name}', 5)" 
+                                    class="w-6 h-6 flex items-center justify-center rounded bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white transition-all text-xs font-bold select-none" title="+5г">▲</button>
+                            </div>
                             <span class="text-xs text-gray-500">г</span>
                             <span class="text-xs text-orange-400 font-medium">${cals} ккал</span>
                             <button onclick="removeComponent('${c.name}')" class="text-gray-500 hover:text-white ml-1">&times;</button>
