@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <!-- v2025-07-17-fix-generator -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🐕 Арчибальд — Премиум мониторинг здоровья</title>
@@ -1038,6 +1039,13 @@
     function toggleReminder(el) { el.classList.toggle('active'); }
     function saveReminder(idx) { showToast('🔔 Напоминание сохранено', '#8b5cf6'); }
     function editMedicine(idx) { showToast('Редактирование — скоро', '#6b7280'); }
-    </script>
+        
+                // Fix: expose addComponent to window scope for onclick handlers
+        window.addComponent = addComponent;
+        window.updateSelectedList = updateSelectedList;
+        window.changeWeight = changeWeight;
+        window.clearComponents = clearComponents;
+        window.generateRecipe = generateRecipe;
+            </script>
 </body>
 </html>
