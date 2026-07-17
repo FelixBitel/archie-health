@@ -1005,7 +1005,7 @@
         if (!selectedComponents.length) { showToast('Выберите компоненты', '#f97316'); return; }
         const names = selectedComponents.map(c => `${c.emoji} ${c.name} (${c.weight}г)`).join(', ');
         const totalCals = selectedComponents.reduce((s,c) => s + Math.round(c.calsper100*c.weight/100), 0);
-        const baseRecipe = (() => { const lc = selectedComponents.map(c => c.name.toLowerCase()); const best = recipes25.map(r => ({r, s: lc.reduce((n, w) => n + (r.toLowerCase().includes(w) ? 1 : 0), 0)})).sort((a,b) => b.s-a.s)[0]; return best.s > 0 ? best.r : recipes25[Math.floor(Math.random()*recipes25.length)]; })();
+        const baseRecipe = (() => { const stems = selectedComponents.map(c => c.name.toLowerCase().slice(0,5)); const best = recipes25.map(r => ({r, s: stems.reduce((n,w) => n+(r.toLowerCase().includes(w)?1:0),0)})).sort((a,b)=>b.s-a.s)[0]; return best.s>0 ? best.r : recipes25[Math.floor(Math.random()*recipes25.length)]; })();.map(c => c.name.toLowerCase()); const best = recipes25.map(r => ({r, s: lc.reduce((n, w) => n + (r.toLowerCase().includes(w) ? 1 : 0), 0)})).sort((a,b) => b.s-a.s)[0]; return best.s > 0 ? best.r : recipes25[Math.floor(Math.random()*recipes25.length)]; })();
         const text = `Состав: ${names}.\n\n${baseRecipe}\n\n🔥 Итого: ${totalCals} ккал`;
 
         const result = document.getElementById('recipe-result');
