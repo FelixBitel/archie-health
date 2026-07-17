@@ -968,7 +968,17 @@
         normPercent.textContent = pct + '% от дневной нормы';
     }
 
-    function changeWeight(i, delta) {
+        function addComponent(name, calsper100, emoji, defaultWeight) {
+            const existing = selectedComponents.find(c => c.name === name);
+            if (existing) {
+                existing.weight += defaultWeight;
+            } else {
+                selectedComponents.push({ name, calsper100, emoji, weight: defaultWeight });
+            }
+            updateSelectedList();
+        }
+
+            function changeWeight(i, delta) {
         selectedComponents[i].weight = Math.max(10, selectedComponents[i].weight + delta);
         updateSelectedList();
     }
