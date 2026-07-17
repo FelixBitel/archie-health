@@ -97,7 +97,7 @@
         .modal-content { transform: scale(0.95) translateY(20px); transition: all 0.3s ease; }
         .modal.active .modal-content { transform: scale(1) translateY(0); }
         
-        .toggle { width: 48px; height: 24px; border-radius: 12px; position: relative; cursor: pointer; transition: background 0.3s; }
+        .toggle { width: 48px; height: 24px; border-radius: 12px; position: relative; cursor: pointer; transition: background 0.3s; background: #374151; }
         .toggle::after { content: ''; position: absolute; width: 20px; height: 20px; border-radius: 50%; background: white; top: 2px; left: 2px; transition: transform 0.3s; }
         .toggle.active { background: #22c55e; }
         .toggle.active::after { transform: translateX(24px); }
@@ -124,6 +124,16 @@
         
         .card-link { transition: all 0.3s; }
         .card-link:hover { transform: translateY(-4px); }
+
+        .med-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
     </style>
 </head>
 <body class="text-white overflow-x-hidden">
@@ -142,7 +152,7 @@
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                     <i class="fas fa-dog text-white"></i>
                 </div>
-                <span class="text-xl font-bold gradient-text">Арчибальд</span>
+                <span id="nav-name" class="text-xl font-bold gradient-text">Арчибальд</span>
             </div>
             <div class="hidden md:flex items-center gap-8">
                 <a href="#health" class="text-gray-400 hover:text-white transition">Здоровье</a>
@@ -174,17 +184,17 @@
                     </div>
                     
                     <h1 class="text-5xl lg:text-6xl font-extrabold mb-2">
-                        <span class="gradient-text">Арчибальд</span>
+                        <span id="hero-name" class="gradient-text">Арчибальд</span>
                     </h1>
-                    <p class="text-xl text-gray-400 mb-6">Мишлинг, 12 лет, стабильное состояние</p>
+                    <p class="text-xl text-gray-400 mb-6">Мишлинг, <span id="hero-age">12</span> лет, стабильное состояние</p>
                     
                     <div class="flex flex-wrap justify-center lg:justify-start gap-4">
                         <div class="glass-card px-6 py-4 rounded-2xl text-center min-w-[100px]">
-                            <div class="text-2xl font-bold gradient-text">12</div>
+                            <div id="hero-age-card" class="text-2xl font-bold gradient-text">12</div>
                             <div class="text-xs text-gray-500">лет</div>
                         </div>
                         <div class="glass-card px-6 py-4 rounded-2xl text-center min-w-[100px]">
-                            <div class="text-2xl font-bold gradient-text">21.5</div>
+                            <div id="hero-weight-card" class="text-2xl font-bold gradient-text">21.5</div>
                             <div class="text-xs text-gray-500">кг</div>
                         </div>
                         <div class="glass-card px-6 py-4 rounded-2xl text-center min-w-[100px]">
@@ -214,37 +224,8 @@
                         </button>
                     </div>
                     
-                    <div class="h-48 flex items-end justify-between gap-2 px-4">
-                        <div class="flex-1 flex flex-col items-center">
-                            <div class="w-full bg-gray-700/50 rounded-t-lg h-16 bar bar-activity"></div>
-                            <p class="mt-2 text-xs text-gray-500">15.11</p>
-                            <p class="text-xs">22.1 кг</p>
-                        </div>
-                        <div class="flex-1 flex flex-col items-center">
-                            <div class="w-full bg-gray-700/50 rounded-t-lg h-14 bar bar-activity"></div>
-                            <p class="mt-2 text-xs text-gray-500">20.11</p>
-                            <p class="text-xs">21.8 кг</p>
-                        </div>
-                        <div class="flex-1 flex flex-col items-center">
-                            <div class="w-full bg-gray-700/50 rounded-t-lg h-12 bar bar-activity"></div>
-                            <p class="mt-2 text-xs text-gray-500">25.11</p>
-                            <p class="text-xs">21.5 кг</p>
-                        </div>
-                        <div class="flex-1 flex flex-col items-center">
-                            <div class="w-full bg-gray-700/50 rounded-t-lg h-10 bar bar-activity"></div>
-                            <p class="mt-2 text-xs text-gray-500">01.12</p>
-                            <p class="text-xs">21.3 кг</p>
-                        </div>
-                        <div class="flex-1 flex flex-col items-center">
-                            <div class="w-full bg-gray-700/50 rounded-t-lg h-8 bar bar-activity"></div>
-                            <p class="mt-2 text-xs text-gray-500">07.12</p>
-                            <p class="text-xs">21.2 кг</p>
-                        </div>
-                        <div class="flex-1 flex flex-col items-center">
-                            <div class="w-full rounded-t-lg h-6 bar bar-energy"></div>
-                            <p class="mt-2 text-xs text-green-400 font-bold">Сегодня</p>
-                            <p class="text-xs text-green-400">21.0 кг</p>
-                        </div>
+                    <div id="weight-chart" class="h-48 flex items-end justify-between gap-2 px-4">
+                        <!-- rendered by renderWeightChart() -->
                     </div>
                 </div>
                 
@@ -292,13 +273,13 @@
     <section id="nutrition" class="py-16 px-6">
         <div class="max-w-7xl mx-auto">
             <h2 class="text-3xl font-bold mb-2 gradient-text text-center">Питание</h2>
-            <p class="text-gray-500 text-center mb-10">~870 ккал в день</p>
+            <p class="text-gray-500 text-center mb-10"><span id="nutrition-norm-label">~870 ккал</span> в день</p>
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="glass-card rounded-3xl p-6 glow-orange">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-lg font-semibold">Рацион сегодня</h3>
-                        <span class="text-sm text-gray-500">420 / 870 ккал</span>
+                        <span class="text-sm text-gray-500">420 / <span id="norm-today">870</span> ккал</span>
                     </div>
                     
                     <div class="space-y-4">
@@ -345,7 +326,6 @@
                     </div>
                     
                     <div id="generator-panel">
-                        <!-- Daily norm -->
                         <div class="glass p-3 rounded-xl mb-4 flex justify-between items-center">
                             <span class="text-sm text-gray-400">Дневная норма:</span>
                             <span id="daily-norm" class="font-bold text-orange-400">870 ккал</span>
@@ -387,7 +367,6 @@
                             </div>
                         </div>
                         
-                        <!-- Custom input -->
                         <div class="glass p-4 rounded-xl mb-4">
                             <p class="text-xs text-gray-500 mb-2">Свой компонент (ккал/100г):</p>
                             <div class="flex gap-2">
@@ -398,7 +377,6 @@
                             </div>
                         </div>
                         
-                        <!-- Selected with weights -->
                         <div class="glass p-4 rounded-xl mb-4">
                             <div class="flex justify-between items-center mb-3">
                                 <span class="text-xs text-gray-500">Выбрано:</span>
@@ -409,7 +387,6 @@
                             </div>
                         </div>
                         
-                        <!-- Total -->
                         <div class="glass p-4 rounded-xl mb-4">
                             <div class="flex justify-between items-center">
                                 <div>
@@ -433,6 +410,15 @@
                         
                         <div id="recipe-result" class="hidden mt-4"></div>
                     </div>
+
+                    <!-- Saved Recipes -->
+                    <div id="saved-recipes-section" class="mt-6 hidden">
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="text-sm font-semibold text-gray-300">💾 Сохранённые рецепты</h4>
+                            <button onclick="clearRecipes()" class="text-xs text-gray-500 hover:text-red-400">Очистить все</button>
+                        </div>
+                        <div id="saved-recipes-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -452,103 +438,7 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="medicine-list">
-                <div class="glass-card rounded-3xl p-6 glow-purple">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center">
-                                <i class="fas fa-capsules text-purple-400"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-semibold">Урзахол</h3>
-                                <p class="text-sm text-gray-500">Противовоспалительное</p>
-                            </div>
-                        </div>
-                        <button onclick="editMedicine(0)" class="text-gray-500 hover:text-white">
-                            <i class="fas fa-pen text-sm"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="space-y-2 mb-4">
-                        <div class="flex justify-between items-center glass p-3 rounded-xl">
-                            <div class="flex items-center gap-3">
-                                <i class="fas fa-sun text-yellow-400"></i>
-                                <span>Утро</span>
-                            </div>
-                            <span class="font-semibold">09:00</span>
-                        </div>
-                        <div class="flex justify-between items-center glass p-3 rounded-xl opacity-60">
-                            <div class="flex items-center gap-3">
-                                <i class="fas fa-moon text-blue-400"></i>
-                                <span>Вечер</span>
-                            </div>
-                            <span class="font-semibold">21:00</span>
-                        </div>
-                    </div>
-                    
-                    <div class="border-t border-white/10 pt-4">
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="text-sm text-gray-400">Напоминание:</span>
-                            <div class="flex gap-2">
-                                <div class="toggle active" onclick="toggleReminder(this)" title="Telegram"></div>
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <input type="text" placeholder="Telegram ID" value="@archie_health" class="flex-1 bg-transparent border border-white/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-purple-500">
-                            <button onclick="saveReminder(0)" class="btn-ghost px-3 py-1.5">
-                                <i class="fas fa-save"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="glass-card rounded-3xl p-6">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center">
-                                <i class="fas fa-pills text-blue-400"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-semibold">Гепатосан</h3>
-                                <p class="text-sm text-gray-500">Гепатопротектор</p>
-                            </div>
-                        </div>
-                        <button onclick="editMedicine(1)" class="text-gray-500 hover:text-white">
-                            <i class="fas fa-pen text-sm"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="space-y-2 mb-4">
-                        <div class="flex justify-between items-center glass p-3 rounded-xl">
-                            <div class="flex items-center gap-3">
-                                <i class="fas fa-sun text-yellow-400"></i>
-                                <span>Утро</span>
-                            </div>
-                            <span class="font-semibold">09:00</span>
-                        </div>
-                        <div class="flex justify-between items-center glass p-3 rounded-xl">
-                            <div class="flex items-center gap-3">
-                                <i class="fas fa-cloud-sun text-orange-400"></i>
-                                <span>День</span>
-                            </div>
-                            <span class="font-semibold">18:00</span>
-                        </div>
-                    </div>
-                    
-                    <div class="border-t border-white/10 pt-4">
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="text-sm text-gray-400">Напоминание:</span>
-                            <div class="flex gap-2">
-                                <div class="toggle" onclick="toggleReminder(this)" title="Email"></div>
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <input type="email" placeholder="Email" class="flex-1 bg-transparent border border-white/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500">
-                            <button onclick="saveReminder(1)" class="btn-ghost px-3 py-1.5">
-                                <i class="fas fa-save"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <!-- rendered by renderMedicines() -->
             </div>
         </div>
     </section>
@@ -559,70 +449,58 @@
             <h2 class="text-3xl font-bold gradient-text text-center mb-10">Рекомендации по уходу</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <a href="https://vetband.ru/articles/dieta-dlya-sobak-posle-operatsii" target="_blank" class="glass-card rounded-3xl p-6 block card-link">
+                <a href="https://vetband.ru/articles/dieta-dlya-sobak-posle-operatsii" target="_blank" rel="noopener noreferrer" class="glass-card rounded-3xl p-6 block card-link">
                     <div class="w-14 h-14 rounded-2xl bg-green-500/20 flex items-center justify-center mb-4">
                         <i class="fas fa-utensils text-green-400 text-xl"></i>
                     </div>
                     <h3 class="text-lg font-semibold mb-2">Диетическое питание</h3>
                     <p class="text-sm text-gray-400 mb-3">Рекомендации по кормлению собак после операций и при заболеваниях ЖКТ</p>
-                    <span class="text-xs text-green-400 flex items-center gap-1">
-                        Подробнее <i class="fas fa-arrow-right"></i>
-                    </span>
+                    <span class="text-xs text-green-400 flex items-center gap-1">Подробнее <i class="fas fa-arrow-right"></i></span>
                 </a>
                 
-                <a href="https://www.royalcanin.com/ru/dogs/breeds/senior-dog" target="_blank" class="glass-card rounded-3xl p-6 block card-link">
+                <a href="https://www.royalcanin.com/ru/dogs/breeds/senior-dog" target="_blank" rel="noopener noreferrer" class="glass-card rounded-3xl p-6 block card-link">
                     <div class="w-14 h-14 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-4">
                         <i class="fas fa-heartbeat text-blue-400 text-xl"></i>
                     </div>
                     <h3 class="text-lg font-semibold mb-2">Уход за пожилыми собаками</h3>
                     <p class="text-sm text-gray-400 mb-3">Особенности содержания и питания собак старше 10 лет</p>
-                    <span class="text-xs text-blue-400 flex items-center gap-1">
-                        Подробнее <i class="fas fa-arrow-right"></i>
-                    </span>
+                    <span class="text-xs text-blue-400 flex items-center gap-1">Подробнее <i class="fas fa-arrow-right"></i></span>
                 </a>
                 
-                <a href="https://vetmag.ru/diseases/diseases-sobak/artrit-u-sobak/" target="_blank" class="glass-card rounded-3xl p-6 block card-link">
+                <a href="https://vetmag.ru/diseases/diseases-sobak/artrit-u-sobak/" target="_blank" rel="noopener noreferrer" class="glass-card rounded-3xl p-6 block card-link">
                     <div class="w-14 h-14 rounded-2xl bg-purple-500/20 flex items-center justify-center mb-4">
                         <i class="fas fa-paw text-purple-400 text-xl"></i>
                     </div>
                     <h3 class="text-lg font-semibold mb-2">Проблемы с суставами</h3>
                     <p class="text-sm text-gray-400 mb-3">Профилактика и лечение артрита у собак крупных пород</p>
-                    <span class="text-xs text-purple-400 flex items-center gap-1">
-                        Подробнее <i class="fas fa-arrow-right"></i>
-                    </span>
+                    <span class="text-xs text-purple-400 flex items-center gap-1">Подробнее <i class="fas fa-arrow-right"></i></span>
                 </a>
                 
-                <a href="https://www.proplan.ru/dog/article/pravilnoe-pitanie-sobaki/" target="_blank" class="glass-card rounded-3xl p-6 block card-link">
+                <a href="https://www.proplan.ru/dog/article/pravilnoe-pitanie-sobaki/" target="_blank" rel="noopener noreferrer" class="glass-card rounded-3xl p-6 block card-link">
                     <div class="w-14 h-14 rounded-2xl bg-orange-500/20 flex items-center justify-center mb-4">
                         <i class="fas fa-chart-simple text-orange-400 text-xl"></i>
                     </div>
                     <h3 class="text-lg font-semibold mb-2">Контроль веса</h3>
                     <p class="text-sm text-gray-400 mb-3">Как поддерживать оптимальный вес у собаки</p>
-                    <span class="text-xs text-orange-400 flex items-center gap-1">
-                        Подробнее <i class="fas fa-arrow-right"></i>
-                    </span>
+                    <span class="text-xs text-orange-400 flex items-center gap-1">Подробнее <i class="fas fa-arrow-right"></i></span>
                 </a>
                 
-                <a href="https://zverivdom.com/article/kak-chasto-guliat-s-sobakoy" target="_blank" class="glass-card rounded-3xl p-6 block card-link">
+                <a href="https://zverivdom.com/article/kak-chasto-guliat-s-sobakoy" target="_blank" rel="noopener noreferrer" class="glass-card rounded-3xl p-6 block card-link">
                     <div class="w-14 h-14 rounded-2xl bg-yellow-500/20 flex items-center justify-center mb-4">
                         <i class="fas fa-walking text-yellow-400 text-xl"></i>
                     </div>
                     <h3 class="text-lg font-semibold mb-2">Режим прогулок</h3>
                     <p class="text-sm text-gray-400 mb-3">Оптимальная продолжительность и частота прогулок</p>
-                    <span class="text-xs text-yellow-400 flex items-center gap-1">
-                        Подробнее <i class="fas fa-arrow-right"></i>
-                    </span>
+                    <span class="text-xs text-yellow-400 flex items-center gap-1">Подробнее <i class="fas fa-arrow-right"></i></span>
                 </a>
                 
-                <a href="https://veterinar56.ru/statiya-o-psakh/chem-lechit-pochki-u-sobaki" target="_blank" class="glass-card rounded-3xl p-6 block card-link">
+                <a href="https://veterinar56.ru/statiya-o-psakh/chem-lechit-pochki-u-sobaki" target="_blank" rel="noopener noreferrer" class="glass-card rounded-3xl p-6 block card-link">
                     <div class="w-14 h-14 rounded-2xl bg-red-500/20 flex items-center justify-center mb-4">
                         <i class="fas fa-kidney text-red-400 text-xl"></i>
                     </div>
                     <h3 class="text-lg font-semibold mb-2">Почечные заболевания</h3>
                     <p class="text-sm text-gray-400 mb-3">Профилактика и раннее выявление проблем с почками</p>
-                    <span class="text-xs text-red-400 flex items-center gap-1">
-                        Подробнее <i class="fas fa-arrow-right"></i>
-                    </span>
+                    <span class="text-xs text-red-400 flex items-center gap-1">Подробнее <i class="fas fa-arrow-right"></i></span>
                 </a>
             </div>
         </div>
@@ -669,6 +547,33 @@
             </div>
         </div>
     </div>
+
+    <!-- Weight Modal -->
+    <div id="weight-modal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="modal-content glass-card rounded-3xl p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold">⚖️ Записать вес</h3>
+                <button onclick="closeModal('weight-modal')" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form onsubmit="saveWeight(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Вес (кг)</label>
+                    <input type="number" step="0.1" id="weight-value" required placeholder="21.5" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Дата</label>
+                    <input type="date" id="weight-date" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500">
+                </div>
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition">
+                    Сохранить
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Medicine Modal -->
     <div id="medicine-modal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="modal-content glass-card rounded-3xl p-6 w-full max-w-md">
             <div class="flex justify-between items-center mb-6">
@@ -684,1644 +589,399 @@
                     <input type="text" id="med-name" required class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500">
                 </div>
                 <div>
+                    <label class="block text-sm text-gray-400 mb-1">Тип / описание</label>
+                    <input type="text" id="med-type" placeholder="Противовоспалительное" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500">
+                </div>
+                <div>
                     <label class="block text-sm text-gray-400 mb-1">Дозировка</label>
                     <input type="text" id="med-dosage" placeholder="1 таблетка" required class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500">
                 </div>
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Время приёма (через запятую)</label>
-                    <input type="text" id="med-times" placeholder="09:00, 18:00, 21:00" required class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Утро (время)</label>
+                        <input type="time" id="med-morning" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Вечер (время)</label>
+                        <input type="time" id="med-evening" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500">
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Напоминание (Telegram или Email)</label>
-                    <input type="text" id="med-reminder" placeholder="@username или email@example.com" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500">
-                </div>
-                
                 <button type="submit" class="w-full py-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl font-semibold hover:from-purple-600 hover:to-purple-700 transition">
-                    Сохранить
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Weight Modal -->
-    <div id="weight-modal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="modal-content glass-card rounded-3xl p-6 w-full max-w-md">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold">Записать вес</h3>
-                <button onclick="closeModal('weight-modal')" class="text-gray-400 hover:text-white">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            
-            <form onsubmit="saveWeight(event)" class="space-y-4">
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Вес (кг)</label>
-                    <input type="number" step="0.1" id="weight-value" required placeholder="21.0" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Дата</label>
-                    <input type="date" id="weight-date" required class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500">
-                </div>
-                
-                <button type="submit" class="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition">
-                    Сохранить
+                    Добавить
                 </button>
             </form>
         </div>
     </div>
 
     <script>
-        const selectedComponents = [];
-        let dailyNorm = 870;
-        
-        function toggleGenerator() {
-            const panel = document.getElementById('generator-panel');
-            const icon = document.getElementById('gen-toggle-icon');
-            panel.classList.toggle('hidden');
-            if (icon) icon.style.transform = panel.classList.contains('hidden') ? '' : 'rotate(180deg)';
-        }
-        
-        function addComponent(name, calsPer100g, emoji, defaultWeight = 100) {
-            if (selectedComponents.find(c => c.name === name)) {
-                showToast('Компонент уже добавлен', 'info');
-                return;
-            }
-            selectedComponents.push({ name, calsPer100g, emoji, weight: defaultWeight });
-            updateComponentsList();
-        }
-        
-        function addCustomComponent() {
-            const nameInput = document.getElementById('custom-component');
-            const calsInput = document.getElementById('custom-cals');
-            const weightInput = document.getElementById('custom-weight');
-            const name = nameInput.value.trim();
-            const cals = parseInt(calsInput.value);
-            const weight = parseInt(weightInput.value) || 100;
-            if (!name || !cals) return showToast('Введите название и калории', 'error');
-            addComponent(name, cals, '🍽️', weight);
-            nameInput.value = '';
-            calsInput.value = '';
-            weightInput.value = '100';
-        }
-        
-        function updateComponentWeight(name, weight) {
-            const comp = selectedComponents.find(c => c.name === name);
-            if (comp) {
-                comp.weight = parseInt(weight) || 0;
-                updateComponentsList();
-            }
-        }
+    // ─── STATE ───────────────────────────────────────────────────────────────
+    let state = {
+        settings: { cals: 870, name: 'Арчибальд', age: 12, weight: 21.5 },
+        weightLog: [
+            { date: '15.11', value: 22.1 },
+            { date: '20.11', value: 21.8 },
+            { date: '25.11', value: 21.5 },
+            { date: '01.12', value: 21.3 },
+            { date: '07.12', value: 21.2 },
+            { date: 'Сег', value: 21.0, today: true }
+        ],
+        medicines: [
+            { name: 'Урзахол', type: 'Противовоспалительное', dosage: '1 таб.', morning: '09:00', evening: '21:00', icon: 'fa-capsules', color: 'purple' },
+            { name: 'Гепатосан', type: 'Гепатопротектор', dosage: '1 таб.', morning: '09:00', day: '18:00', icon: 'fa-pills', color: 'blue' }
+        ],
+        recipes: []
+    };
 
-        function adjustComponentWeight(name, delta) {
-            const comp = selectedComponents.find(c => c.name === name);
-            if (comp) {
-                comp.weight = Math.max(5, (comp.weight || 0) + delta);
-                updateComponentsList();
+    // ─── PERSIST ─────────────────────────────────────────────────────────────
+    function save() {
+        try { localStorage.setItem('archie_state', JSON.stringify(state)); } catch(e) {}
+    }
+    function load() {
+        try {
+            const raw = localStorage.getItem('archie_state');
+            if (raw) {
+                const loaded = JSON.parse(raw);
+                state = Object.assign(state, loaded);
             }
+        } catch(e) {}
+    }
+
+    // ─── INIT ─────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+        load();
+        applySettings();
+        renderWeightChart();
+        renderMedicines();
+        renderSavedRecipes();
+
+        // Set today's date default in weight modal
+        const wd = document.getElementById('weight-date');
+        if (wd) wd.valueAsDate = new Date();
+    });
+
+    // ─── SETTINGS ────────────────────────────────────────────────────────────
+    function saveSettings() {
+        state.settings = {
+            cals: parseInt(document.getElementById('setting-cals').value) || 870,
+            name: document.getElementById('setting-name').value || 'Арчибальд',
+            age: parseInt(document.getElementById('setting-age').value) || 12,
+            weight: parseFloat(document.getElementById('setting-weight').value) || 21.5
+        };
+        save();
+        applySettings();
+        closeModal('settings-modal');
+        showToast('✅ Настройки сохранены!', '#22c55e');
+    }
+
+    function applySettings() {
+        const s = state.settings;
+        document.getElementById('nav-name').textContent = s.name;
+        document.getElementById('hero-name').textContent = s.name;
+        document.getElementById('hero-age').textContent = s.age;
+        document.getElementById('hero-age-card').textContent = s.age;
+        document.getElementById('hero-weight-card').textContent = s.weight;
+        document.getElementById('daily-norm').textContent = s.cals + ' ккал';
+        document.getElementById('norm-today').textContent = s.cals;
+        document.getElementById('nutrition-norm-label').textContent = '~' + s.cals + ' ккал';
+
+        // Sync modal fields
+        document.getElementById('setting-cals').value = s.cals;
+        document.getElementById('setting-name').value = s.name;
+        document.getElementById('setting-age').value = s.age;
+        document.getElementById('setting-weight').value = s.weight;
+    }
+
+    // ─── WEIGHT ──────────────────────────────────────────────────────────────
+    function saveWeight(e) {
+        e.preventDefault();
+        const val = parseFloat(document.getElementById('weight-value').value);
+        const dateRaw = document.getElementById('weight-date').value;
+        if (!val) return;
+        const d = dateRaw ? new Date(dateRaw) : new Date();
+        const label = d.getDate() + '.' + String(d.getMonth()+1).padStart(2,'0');
+        // Remove old "today" flag
+        state.weightLog = state.weightLog.map(w => ({ ...w, today: false }));
+        state.weightLog.push({ date: label, value: val, today: true });
+        // Keep last 8
+        if (state.weightLog.length > 8) state.weightLog = state.weightLog.slice(-8);
+        save();
+        renderWeightChart();
+        closeModal('weight-modal');
+        showToast('⚖️ Вес записан: ' + val + ' кг', '#3b82f6');
+        document.getElementById('weight-value').value = '';
+    }
+
+    function renderWeightChart() {
+        const container = document.getElementById('weight-chart');
+        if (!container) return;
+        const log = state.weightLog;
+        if (!log.length) { container.innerHTML = '<p class="text-gray-500 text-sm">Нет данных</p>'; return; }
+        const max = Math.max(...log.map(w => w.value));
+        const min = Math.min(...log.map(w => w.value));
+        const range = max - min || 1;
+        const maxBarH = 160; // px
+        const minBarH = 20;
+
+        container.innerHTML = log.map(w => {
+            const h = minBarH + ((w.value - min) / range) * (maxBarH - minBarH);
+            const isToday = w.today;
+            const barClass = isToday ? 'bar-energy' : 'bar-activity';
+            const labelClass = isToday ? 'text-green-400 font-bold' : 'text-gray-500';
+            const valClass = isToday ? 'text-green-400' : '';
+            return `<div class="flex-1 flex flex-col items-center">
+                <div class="w-full rounded-t-lg bar ${barClass}" style="height:${h}px"></div>
+                <p class="mt-2 text-xs ${labelClass}">${w.date}</p>
+                <p class="text-xs ${valClass}">${w.value} кг</p>
+            </div>`;
+        }).join('');
+    }
+
+    // ─── MEDICINE ────────────────────────────────────────────────────────────
+    const MED_COLORS = ['purple','blue','green','orange','pink','yellow'];
+    const MED_ICONS = ['fa-capsules','fa-pills','fa-syringe','fa-tablets'];
+
+    function saveMedicine(e) {
+        e.preventDefault();
+        const med = {
+            name: document.getElementById('med-name').value,
+            type: document.getElementById('med-type').value || '',
+            dosage: document.getElementById('med-dosage').value,
+            morning: document.getElementById('med-morning').value,
+            evening: document.getElementById('med-evening').value,
+            icon: MED_ICONS[state.medicines.length % MED_ICONS.length],
+            color: MED_COLORS[state.medicines.length % MED_COLORS.length]
+        };
+        state.medicines.push(med);
+        save();
+        renderMedicines();
+        closeModal('medicine-modal');
+        showToast('💊 ' + med.name + ' добавлен', '#a855f7');
+        e.target.reset();
+    }
+
+    function deleteMedicine(idx) {
+        state.medicines.splice(idx, 1);
+        save();
+        renderMedicines();
+        showToast('🗑 Лекарство удалено', '#6b7280');
+    }
+
+    function renderMedicines() {
+        const list = document.getElementById('medicine-list');
+        if (!list) return;
+        if (!state.medicines.length) {
+            list.innerHTML = '<p class="text-gray-500 col-span-2 text-center py-8">Нет активных лекарств. Нажмите «Добавить».</p>';
+            return;
         }
-        
-        function removeComponent(name) {
-            const idx = selectedComponents.findIndex(c => c.name === name);
-            if (idx > -1) selectedComponents.splice(idx, 1);
-            updateComponentsList();
-        }
-        
-        function updateComponentsList() {
-            const list = document.getElementById('selected-list');
-            const totalCalsEl = document.getElementById('total-cals');
-            const totalWeightEl = document.getElementById('total-weight');
-            const normProgress = document.getElementById('norm-progress');
-            const normPercent = document.getElementById('norm-percent');
-            
-            if (selectedComponents.length === 0) {
-                list.innerHTML = '<span class="text-sm text-gray-400">Нажмите на компоненты...</span>';
-                totalCalsEl.textContent = '0 ккал';
-                totalWeightEl.textContent = '0 г';
-                normProgress.style.width = '0%';
-                normPercent.textContent = '0% от дневной нормы';
-            } else {
-                list.innerHTML = selectedComponents.map(c => {
-                    const cals = Math.round((c.calsPer100g / 100) * c.weight);
-                    return `
-                    <div class="glass px-3 py-2 rounded-lg flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span>${c.emoji}</span>
-                            <span class="text-sm">${c.name}</span>
+        list.innerHTML = state.medicines.map((med, i) => {
+            const times = [];
+            if (med.morning) times.push(`<div class="flex justify-between items-center glass p-3 rounded-xl"><div class="flex items-center gap-3"><i class="fas fa-sun text-yellow-400"></i><span>Утро</span></div><span class="font-semibold">${med.morning}</span></div>`);
+            if (med.day) times.push(`<div class="flex justify-between items-center glass p-3 rounded-xl"><div class="flex items-center gap-3"><i class="fas fa-cloud-sun text-orange-400"></i><span>День</span></div><span class="font-semibold">${med.day}</span></div>`);
+            if (med.evening) times.push(`<div class="flex justify-between items-center glass p-3 rounded-xl opacity-80"><div class="flex items-center gap-3"><i class="fas fa-moon text-blue-400"></i><span>Вечер</span></div><span class="font-semibold">${med.evening}</span></div>`);
+            return `<div class="med-card glow-${med.color}">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-${med.color}-500/20 flex items-center justify-center">
+                            <i class="fas ${med.icon} text-${med.color}-400"></i>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <div class="flex items-center gap-1">
-                                <button onclick="adjustComponentWeight('${c.name}', -5)" 
-                                    class="w-6 h-6 flex items-center justify-center rounded bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white transition-all text-xs font-bold select-none" title="−5г">▼</button>
-                                <input type="number" value="${c.weight}" 
-                                    onchange="updateComponentWeight('${c.name}', this.value)"
-                                    class="w-14 bg-white/10 border border-white/20 rounded px-2 py-1 text-xs text-center">
-                                <button onclick="adjustComponentWeight('${c.name}', 5)" 
-                                    class="w-6 h-6 flex items-center justify-center rounded bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white transition-all text-xs font-bold select-none" title="+5г">▲</button>
-                            </div>
-                            <span class="text-xs text-gray-500">г</span>
-                            <span class="text-xs text-orange-400 font-medium">${cals} ккал</span>
-                            <button onclick="removeComponent('${c.name}')" class="text-gray-500 hover:text-white ml-1">&times;</button>
+                        <div>
+                            <h3 class="text-lg font-semibold">${med.name}</h3>
+                            <p class="text-sm text-gray-500">${med.type}${med.dosage ? ' · ' + med.dosage : ''}</p>
                         </div>
                     </div>
-                `}).join('');
-                
-                const totalCals = selectedComponents.reduce((s, c) => s + Math.round((c.calsPer100g / 100) * c.weight), 0);
-                const totalWeight = selectedComponents.reduce((s, c) => s + c.weight, 0);
-                const percent = Math.round((totalCals / dailyNorm) * 100);
-                
-                totalCalsEl.textContent = `${totalCals} ккал`;
-                totalWeightEl.textContent = `${totalWeight} г`;
-                normProgress.style.width = `${Math.min(percent, 100)}%`;
-                normPercent.textContent = `${percent}% от дневной нормы`;
-            }
-        }
-        
-        function clearComponents() {
-            selectedComponents.length = 0;
-            updateComponentsList();
-            document.getElementById('recipe-result').classList.add('hidden');
-        }
-        
-        // ==========================================
-                // БИБЛИОТЕКА РЕЦЕПТОВ (25 рецептов)
-                // ==========================================
-                const recipeLibrary = [
-                    {
-                        id: 1,
-                        name: 'Диетическое куриное рагу с овощами',
-                        category: 'main',
-                        method: 'тушение',
-                        time: '40 мин',
-                        tags: ['курица', 'морковь', 'кабачок', 'брокколи'],
-                        ingredients: [
-                            { name: 'Курица', weight: 150 },
-                            { name: 'Морковь', weight: 50 },
-                            { name: 'Кабачок', weight: 70 },
-                            { name: 'Брокколи', weight: 60 }
-                        ],
-                        steps: [
-                            'Куриное филе промыть, нарезать небольшими кубиками (2–3 см)',
-                            'Овощи вымыть. Морковь натереть на крупной тёрке, кабачок нарезать кубиками, брокколи разобрать на соцветия',
-                            'В кастрюлю налить 200 мл воды, довести до кипения',
-                            'Добавить курицу, варить 15 минут на среднем огне',
-                            'Добавить морковь, варить 5 минут',
-                            'Добавить кабачок и брокколи, тушить под крышкой 10–12 минут',
-                            'Слить лишний бульон, оставив ~50 мл. Остудить до +37°C перед подачей'
-                        ],
-                        tips: 'Овощи не переваривайте — они должны остаться мягкими, но не разваливаться.'
-                    },
-                    {
-                        id: 2,
-                        name: 'Говядина с гречкой в мультиварке',
-                        category: 'main',
-                        method: 'варка',
-                        time: '1 час',
-                        tags: ['говядина', 'гречка', 'морковь'],
-                        ingredients: [
-                            { name: 'Говядина', weight: 150 },
-                            { name: 'Гречка', weight: 100 },
-                            { name: 'Морковь', weight: 50 }
-                        ],
-                        steps: [
-                            'Говядину промыть, нарезать на небольшие кусочки (~2 см)',
-                            'Морковь натереть на крупной тёрке',
-                            'Гречку промыть до прозрачной воды',
-                            'В чашу мультиварки выложить мясо, добавить 300 мл воды, включить режим «Тушение» на 30 минут',
-                            'Добавить гречку и морковь, долить воды до отметки (примерно 400 мл total)',
-                            'Переключить на режим «Каша» / «Крупы» на 25 минут',
-                            'Дождаться естественного сброса пара, открыть и остудить до +37°C'
-                        ],
-                        tips: 'Гречка впитает мясной сок — это идеальный вариант для собак с чувствительным пищеварением.'
-                    },
-                    {
-                        id: 3,
-                        name: 'Печёночный паштет с морковью',
-                        category: 'appetizer',
-                        method: 'варка',
-                        time: '30 мин',
-                        tags: ['печень', 'морковь'],
-                        ingredients: [
-                            { name: 'Печень куриная', weight: 80 },
-                            { name: 'Морковь', weight: 50 }
-                        ],
-                        steps: [
-                            'Печень промыть, удалить крупные сосуды и плёнки',
-                            'Морковь очистить, нарезать кружками',
-                            'В кастрюлю налить воду, довести до кипения, опустить печень и морковь',
-                            'Варить на среднем огне 20 минут до полной готовности',
-                            'Слить воду, остудить до комнатной температуры',
-                            'Пюрировать блендером до однородной массы',
-                            'Разложить по порциям, хранить в холодильнике до 48 часов'
-                        ],
-                        tips: 'Печень — рекордсмен по витамину A и B12. Паштет можно заморозить порциями.'
-                    },
-                    {
-                        id: 4,
-                        name: 'Нежная овсяно-индейская каша',
-                        category: 'main',
-                        method: 'варка',
-                        time: '35 мин',
-                        tags: ['индейка', 'овсянка', 'морковь'],
-                        ingredients: [
-                            { name: 'Индейка', weight: 150 },
-                            { name: 'Овсянка', weight: 80 },
-                            { name: 'Морковь', weight: 50 }
-                        ],
-                        steps: [
-                            'Индейку нарезать мелкими кубиками (1–2 см)',
-                            'Морковь натереть на мелкой тёрке',
-                            'Овсянку залить водой (200 мл), дать постоять 5 минут',
-                            'В кастрюлю налить 300 мл воды, довести до кипения',
-                            'Добавить индейку, варить 15 минут',
-                            'Добавить размоченную овсянку и морковь, варить ещё 10 минут',
-                            'Размять вилкой до консистенции каши, остудить до +37°C'
-                        ],
-                        tips: 'Овсянка должна быть полностью разварена — для чувствительного ЖКТ дополнительно протереть через сито.'
-                    },
-                    {
-                        id: 5,
-                        name: 'Тыквенно-рисовая каша с говядиной',
-                        category: 'main',
-                        method: 'варка',
-                        time: '45 мин',
-                        tags: ['говядина', 'рис', 'тыква'],
-                        ingredients: [
-                            { name: 'Говядина', weight: 150 },
-                            { name: 'Рис', weight: 100 },
-                            { name: 'Тыква', weight: 80 }
-                        ],
-                        steps: [
-                            'Говядину нарезать кубиками 2 см, промыть',
-                            'Рис промыть до прозрачной воды',
-                            'Тыкву очистить, нарезать мелкими кубиками (1 см)',
-                            'Отварить говядину в 400 мл воды 25 минут',
-                            'Рис замочить на 10 минут, затем добавить к мясу',
-                            'Добавить тыкву, варить ещё 15 минут до готовности риса',
-                            'Размять вилкой (тыква должна превратиться в пюре), остудить'
-                        ],
-                        tips: 'Тыква нормализует пищеварение и придаёт каше приятную сладость.'
-                    },
-                    {
-                        id: 6,
-                        name: 'Рыбные котлеты на пару с брокколи',
-                        category: 'main',
-                        method: 'пар',
-                        time: '30 мин',
-                        tags: ['рыба', 'брокколи', 'яйцо'],
-                        ingredients: [
-                            { name: 'Рыба белая', weight: 120 },
-                            { name: 'Брокколи', weight: 60 },
-                            { name: 'Яйцо', weight: 50 }
-                        ],
-                        steps: [
-                            'Рыбное филе промыть, проверить на отсутствие костей',
-                            'Брокколи разобрать на мелкие соцветия, отварить на пару 5 минут',
-                            'Рыбу и брокколи пропустить через мясорубку или измельчить блендером',
-                            'Добавить яйцо, перемешать до однородности',
-                            'Сформировать котлеты (размер ~4 см в диаметре)',
-                            'Готовить на пару 15–18 минут',
-                            'Остудить, разрезать на smaller кусочки для удобства'
-                        ],
-                        tips: 'Рыба — источник омега-3. Котлеты можно заморозить сырыми и готовить порционно.'
-                    },
-                    {
-                        id: 7,
-                        name: 'Творожная запеканка с тыквой',
-                        category: 'appetizer',
-                        method: 'запекание',
-                        time: '40 мин',
-                        tags: ['творог', 'тыква', 'яйцо'],
-                        ingredients: [
-                            { name: 'Творог 5%', weight: 100 },
-                            { name: 'Тыква', weight: 80 },
-                            { name: 'Яйцо', weight: 50 }
-                        ],
-                        steps: [
-                            'Тыкву очистить, нарезать мелкими кубиками, отварить до мягкости (10 мин)',
-                            'Творог протереть через сито для однородности',
-                            'Соединить творог, тыкву (размять в пюре), яйцо',
-                            'Форму смазать тонким слоем масла, выложить массу',
-                            'Запекать при 180°C 25 минут (до золотистой корочки сверху)',
-                            'Остудить в духовке, затем в холодильнике',
-                            'Нарезать кубиками 2×2 см, подавать комнатной температуры'
-                        ],
-                        tips: 'Запеканка хранится в холодильнике до 72 часов.'
-                    },
-                    {
-                        id: 8,
-                        name: 'Мясное пюре с кабачком',
-                        category: 'main',
-                        method: 'варка',
-                        time: '30 мин',
-                        tags: ['говядина', 'кабачок'],
-                        ingredients: [
-                            { name: 'Говядина', weight: 150 },
-                            { name: 'Кабачок', weight: 100 }
-                        ],
-                        steps: [
-                            'Говядину нарезать крупными кусками, промыть',
-                            'Кабачок очистить от кожуры и семян, нарезать кружками',
-                            'В кастрюлю налить 300 мл воды, довести до кипения',
-                            'Опустить мясо, варить 20 минут',
-                            'Добавить кабачок, варить ещё 8 минут',
-                            'Слить бульон (сохранить!), измельчить всё блендером до пюре',
-                            'Добавить немного бульона для нужной консистенции, остудить'
-                        ],
-                        tips: 'Это базовый рецепт для собак с проблемами ЖКТ. Консистенция должна быть как у детского пюре.'
-                    },
-                    {
-                        id: 9,
-                        name: 'Рисово-овсяная каша с яйцом',
-                        category: 'main',
-                        method: 'варка',
-                        time: '25 мин',
-                        tags: ['рис', 'овсянка', 'яйцо'],
-                        ingredients: [
-                            { name: 'Рис', weight: 80 },
-                            { name: 'Овсянка', weight: 50 },
-                            { name: 'Яйцо', weight: 50 }
-                        ],
-                        steps: [
-                            'Рис промыть, залить 200 мл воды, варить 15 минут',
-                            'Добавить овсянку, варить ещё 5 минут, помешивая',
-                            'Яйцо взбить, тонкой струйкой влить в кашу, постоянно помешивая',
-                            'Держать на огне 2 минуты для «связывания» яйца',
-                            'Снять с огня, добавить щепотку рубленой петрушки (без стеблей)',
-                            'Остудить до +37°C, подавать'
-                        ],
-                        tips: 'Яйцо добавляйте только в конце, чтобы оно не свернулось хлопьями.'
-                    },
-                    {
-                        id: 10,
-                        name: 'Паровые котлеты из индейки с морковью',
-                        category: 'main',
-                        method: 'пар',
-                        time: '35 мин',
-                        tags: ['индейка', 'морковь'],
-                        ingredients: [
-                            { name: 'Индейка', weight: 150 },
-                            { name: 'Морковь', weight: 60 }
-                        ],
-                        steps: [
-                            'Индейку промыть, нарезать на куски, пропустить через мясорубку',
-                            'Морковь натереть на мелкой тёрке, отжать лишний сок',
-                            'Соединить фарш и морковь, тщательно перемешать',
-                            'Сформировать котлеты (~5 см в диаметре, 2 см толщиной)',
-                            'Готовить на пару 20 минут',
-                            'Остудить, нарезать на smaller кусочки'
-                        ],
-                        tips: 'Котлеты на пару — самый щадящий способ, сохраняет максимум питательных веществ.'
-                    },
-                    {
-                        id: 11,
-                        name: 'Узвар из говядины с овощами',
-                        category: 'broth',
-                        method: 'варка',
-                        time: '2 часа',
-                        tags: ['говядина', 'морковь', 'кабачок'],
-                        ingredients: [
-                            { name: 'Говядина', weight: 200 },
-                            { name: 'Морковь', weight: 50 },
-                            { name: 'Кабачок', weight: 50 }
-                        ],
-                        steps: [
-                            'Говядину промыть, залить холодной водой (1 л), довести до кипения',
-                            'Слить первую воду (промыть мясо и кастрюлю)',
-                            'Снова залить чистой водой, довести до кипения, убавить огонь до минимума',
-                            'Варить под крышкой 1.5 часа',
-                            'Добавить очищенную морковь и кабачок целиком, варить ещё 30 минут',
-                            'Процедить бульон, мясо отделить от костей, овощи размять',
-                            'Смешать, остудить, давать как отдельное блюдо или добавку к каше'
-                        ],
-                        tips: 'Узвар — питательный бульон для собак с проблемами суставов. Давайте 2–3 раза в неделю.'
-                    },
-                    {
-                        id: 12,
-                        name: 'Яблочно-морковное пюре с творогом',
-                        category: 'snack',
-                        method: 'пюрирование',
-                        time: '15 мин',
-                        tags: ['творог', 'морковь'],
-                        ingredients: [
-                            { name: 'Творог 5%', weight: 80 },
-                            { name: 'Морковь', weight: 60 },
-                            { name: 'Яблоко', weight: 100 }
-                        ],
-                        steps: [
-                            'Морковь отварить до мягкости (15 минут)',
-                            'Яблоко очистить от кожуры и семян, нарезать дольками',
-                            'Всё пюрировать блендером до однородной массы',
-                            'Добавить творог, перемешать',
-                            'Подавать комнатной температуры или слегка подогретым'
-                        ],
-                        tips: 'Яблоки давайте только без семян — они содержат цианид.'
-                    },
-                    {
-                        id: 13,
-                        name: 'Куриные сердечки с гречкой',
-                        category: 'main',
-                        method: 'варка',
-                        time: '35 мин',
-                        tags: ['курица', 'гречка'],
-                        ingredients: [
-                            { name: 'Курица', weight: 150 },
-                            { name: 'Гречка', weight: 100 }
-                        ],
-                        steps: [
-                            'Куриные сердечки промыть, удалить крупные сосуды и жир',
-                            'Гречку промыть до прозрачной воды',
-                            'В кастрюлю налить 300 мл воды, довести до кипения',
-                            'Добавить сердечки, варить 15 минут',
-                            'Добавить гречку, варить ещё 15 минут',
-                            'Слить лишний бульон, остудить до +37°C',
-                            'Для старых собак дополнительно измельчить вилкой'
-                        ],
-                        tips: 'Сердечки — источник белка и таурина. Полезны для сердечно-сосудистой системы.'
-                    },
-                    {
-                        id: 14,
-                        name: 'Брокколи с яйцом и рисом',
-                        category: 'main',
-                        method: 'варка',
-                        time: '25 мин',
-                        tags: ['брокколи', 'яйцо', 'рис'],
-                        ingredients: [
-                            { name: 'Брокколи', weight: 80 },
-                            { name: 'Яйцо', weight: 50 },
-                            { name: 'Рис', weight: 100 }
-                        ],
-                        steps: [
-                            'Рис промыть, варить в 250 мл воды 15 минут',
-                            'Брокколи разобрать на соцветия, отварить на пару 5 минут',
-                            'Яйцо сварить вкрутую (10 минут), остудить, очистить',
-                            'Брокколи мелко нарезать, яйцо размять вилкой',
-                            'Соединить с рисом, перемешать',
-                            'Остудить до +37°C'
-                        ],
-                        tips: 'Брокколи содержит витамин C и клетчатку, но давайте не чаще 2–3 раз в неделю.'
-                    },
-                    {
-                        id: 15,
-                        name: 'Тыквенный суп-пюре с говядиной',
-                        category: 'main',
-                        method: 'варка',
-                        time: '40 мин',
-                        tags: ['говядина', 'тыква'],
-                        ingredients: [
-                            { name: 'Говядина', weight: 150 },
-                            { name: 'Тыква', weight: 100 }
-                        ],
-                        steps: [
-                            'Говядину нарезать кубиками 2 см, отварить до готовности (25 мин)',
-                            'Тыкву очистить, нарезать кубиками, добавить к мясу',
-                            'Варить ещё 10 минут до мягкости тыквы',
-                            'Слить бульон (сохранить), измельчить всё в пюре',
-                            'Добавить бульон до нужной консистенции (как густая сметана)',
-                            'Остудить до +37°C, подавать'
-                        ],
-                        tips: 'Тыквенный суп — отличное лечебное питание при проблемах с пищеварением.'
-                    },
-                    {
-                        id: 16,
-                        name: 'Паровая рыба с кабачком',
-                        category: 'main',
-                        method: 'пар',
-                        time: '25 мин',
-                        tags: ['рыба', 'кабачок'],
-                        ingredients: [
-                            { name: 'Рыба белая', weight: 120 },
-                            { name: 'Кабачок', weight: 80 }
-                        ],
-                        steps: [
-                            'Рыбу промыть, нарезать на порционные куски, проверить на кости',
-                            'Кабачок очистить, нарезать тонкими кружками',
-                            'В пароварку выложить рыбу, сверху — кабачок',
-                            'Готовить на пару 18–20 минут',
-                            'Проверить готовность рыбы (должна легко разделяться на хлопья)',
-                            'Размять вилкой, удалив кости, остудить'
-                        ],
-                        tips: 'Рыба на пару — идеальный ужин для собак с чувствительным желудком.'
-                    },
-                    {
-                        id: 17,
-                        name: 'Куриные желудки с рисом и морковью',
-                        category: 'main',
-                        method: 'варка',
-                        time: '40 мин',
-                        tags: ['курица', 'рис', 'морковь'],
-                        ingredients: [
-                            { name: 'Курица', weight: 150 },
-                            { name: 'Рис', weight: 100 },
-                            { name: 'Морковь', weight: 50 }
-                        ],
-                        steps: [
-                            'Куриные желудки промыть, снять плёнки и жир, разрезать пополам',
-                            'Морковь нарезать кружками',
-                            'Рис промыть до прозрачной воды',
-                            'В кастрюлю налить 400 мл воды, довести до кипения',
-                            'Добавить желудки, варить 20 минут',
-                            'Добавить рис и морковь, варить ещё 15 минут',
-                            'Остудить до +37°C, подавать'
-                        ],
-                        tips: 'Желудки — субпродукт с высоким содержанием протеина. Полезны для чистки зубов.'
-                    },
-                    {
-                        id: 18,
-                        name: 'Грушево-творожный мусс',
-                        category: 'snack',
-                        method: 'пюрирование',
-                        time: '10 мин',
-                        tags: ['творог', 'груша'],
-                        ingredients: [
-                            { name: 'Творог 5%', weight: 80 },
-                            { name: 'Груша', weight: 100 }
-                        ],
-                        steps: [
-                            'Грушу очистить от кожуры и семян, нарезать дольками',
-                            'Творог комнатной температуры',
-                            'Взбить блендером до воздушной массы',
-                            'Остудить в холодильнике 30 минут перед подачей'
-                        ],
-                        tips: 'Груши помогают при запорах. Давайте как лакомство, не более 2 раз в неделю.'
-                    },
-                    {
-                        id: 19,
-                        name: 'Зелень с яйцом и овсянкой',
-                        category: 'main',
-                        method: 'варка',
-                        time: '20 мин',
-                        tags: ['овсянка', 'яйцо'],
-                        ingredients: [
-                            { name: 'Овсянка', weight: 80 },
-                            { name: 'Яйцо', weight: 50 },
-                            { name: 'Зелень', weight: 20 }
-                        ],
-                        steps: [
-                            'Овсянку залить 200 мл воды, варить 10 минут до мягкости',
-                            'Яйцо взбить, влить в кашу, варить 2 минуты помешивая',
-                            'Зелень (петрушка, укроп — без стеблей) мелко нарезать',
-                            'Добавить зелень, перемешать, снять с огня',
-                            'Остудить до +37°C'
-                        ],
-                        tips: 'Зелень — источник витаминов K и C. Давайте понемногу — избыток может вызвать газообразование.'
-                    },
-                    {
-                        id: 20,
-                        name: 'Картофельно-куриное пюре',
-                        category: 'main',
-                        method: 'варка',
-                        time: '30 мин',
-                        tags: ['курица', 'картофель'],
-                        ingredients: [
-                            { name: 'Курица', weight: 150 },
-                            { name: 'Картофель', weight: 100 }
-                        ],
-                        steps: [
-                            'Курицу нарезать кубиками, отварить до готовности (20 мин)',
-                            'Картофель очистить, нарезать кубиками, отварить отдельно (15 мин)',
-                            'Слить бульон, овощи и мясо пюрировать блендером',
-                            'Добавить немного бульона для консистенции пюре',
-                            'Остудить до +37°C, подавать'
-                        ],
-                        tips: 'Картофель — источник калия, но давайте понемногу (не более 10% рациона).'
-                    },
-                    {
-                        id: 21,
-                        name: 'Печень с тыквой',
-                        category: 'main',
-                        method: 'варка',
-                        time: '25 мин',
-                        tags: ['печень', 'тыква'],
-                        ingredients: [
-                            { name: 'Печень куриная', weight: 80 },
-                            { name: 'Тыква', weight: 100 }
-                        ],
-                        steps: [
-                            'Печень промыть, обсушить, нарезать ломтиками',
-                            'Тыкву очистить, нарезать кубиками 1 см',
-                            'Отварить тыкву до мягкости (8 минут)',
-                            'Добавить печень, варить ещё 7 минут',
-                            'Пюрировать всё вместе до однородной массы',
-                            'Остудить до +37°C'
-                        ],
-                        tips: 'Печень богата витамином A, B2 и железом. Давайте 1–2 раза в неделю.'
-                    },
-                    {
-                        id: 22,
-                        name: 'Кабачковые лодочки с фаршем',
-                        category: 'main',
-                        method: 'тушение',
-                        time: '35 мин',
-                        tags: ['говядина', 'кабачок'],
-                        ingredients: [
-                            { name: 'Говядина', weight: 150 },
-                            { name: 'Кабачок', weight: 150 }
-                        ],
-                        steps: [
-                            'Кабачок разрезать вдоль пополам, ложкой вынуть мякоть',
-                            'Мякоть мелко нарезать, говядину пропустить через мясорубку',
-                            'Смешать фарш с нарезанной мякотью кабачка',
-                            'Положить смесь в «лодочки» из кабачка',
-                            'Выложить в кастрюлю, добавить 50 мл воды, тушить под крышкой 25 минут',
-                            'Остудить, нарезать поперёк на порционные кусочки'
-                        ],
-                        tips: 'Это блюдо — хороший способ добавить овощи для собак, которые их не любят.'
-                    },
-                    {
-                        id: 23,
-                        name: 'Овсяный кисель с яйцом',
-                        category: 'snack',
-                        method: 'варка',
-                        time: '20 мин',
-                        tags: ['овсянка', 'яйцо'],
-                        ingredients: [
-                            { name: 'Овсянка', weight: 60 },
-                            { name: 'Яйцо', weight: 50 }
-                        ],
-                        steps: [
-                            'Овсянку залить 150 мл воды, варить 10 минут до клейкой консистенции',
-                            'Яйцо взбить, тонкой струйкой влить, помешивая',
-                            'Варить ещё 3 минуты до загустения',
-                            'Остудить до +37°C, подавать как самостоятельное блюдо или добавку'
-                        ],
-                        tips: 'Кисель обволакивает желудок — полезно при гастритах и колитах.'
-                    },
-                    {
-                        id: 24,
-                        name: 'Морковно-яблочное смузи с творогом',
-                        category: 'snack',
-                        method: 'блендер',
-                        time: '10 мин',
-                        tags: ['творог', 'морковь'],
-                        ingredients: [
-                            { name: 'Творог 5%', weight: 80 },
-                            { name: 'Морковь', weight: 60 },
-                            { name: 'Яблоко', weight: 80 }
-                        ],
-                        steps: [
-                            'Морковь отварить до мягкости (15 мин), остудить',
-                            'Яблоко очистить от семян, нарезать',
-                            'Все компоненты взбить блендером до однородности',
-                            'Подавать комнатной температуры или слегка охлаждённым'
-                        ],
-                        tips: 'Смузи — отличный способ для собак, которые не любят есть овощи.'
-                    },
-                    {
-                        id: 25,
-                        name: 'Тефтели из говядины на пару',
-                        category: 'main',
-                        method: 'пар',
-                        time: '35 мин',
-                        tags: ['говядина', 'рис'],
-                        ingredients: [
-                            { name: 'Говядина', weight: 150 },
-                            { name: 'Рис', weight: 80 }
-                        ],
-                        steps: [
-                            'Рис промыть, отварить до полуготовности (10 мин), остудить',
-                            'Говядину пропустить через мясорубку',
-                            'Смешать фарш с рисом, тщательно вымешать',
-                            'Сформировать тефтели (~4 см в диаметре)',
-                            'Готовить на пару 20 минут',
-                            'Остудить, разрезать пополам перед подачей'
-                        ],
-                        tips: 'Тефтели — универсальное блюдо. Можно заморозить сырыми и готовить порционно.'
-                    }
+                    <button onclick="deleteMedicine(${i})" class="text-gray-500 hover:text-red-400 transition" title="Удалить">
+                        <i class="fas fa-trash text-sm"></i>
+                    </button>
+                </div>
+                <div class="space-y-2">${times.join('') || '<p class="text-xs text-gray-500">Время не указано</p>'}</div>
+            </div>`;
+        }).join('');
+    }
 
-                    ,{
-                        id: 26,
-                        name: 'Лосось с картофелем и зеленью',
-                        category: 'main',
-                        method: 'варка',
-                        time: '35 мин',
-                        tags: ['рыба', 'картофель', 'зелень'],
-                        ingredients: [
-                            { name: 'Рыба белая', weight: 120 },
-                            { name: 'Картофель', weight: 100 },
-                            { name: 'Зелень', weight: 20 }
-                        ],
-                        steps: [
-                            'Рыбное филе промыть, проверить на кости',
-                            'Картофель очистить, нарезать кубиками 2 см',
-                            'Отварить картофель в воде 15 минут до мягкости',
-                            'В отдельной кастрюле сварить рыбу на пару 10 минут',
-                            'Картофель размять вилкой',
-                            'Рыбу разобрать на мелкие хлопья, добавить к картофелю',
-                            'Добавить мелко нарезанную зелень, остудить до +37°C'
-                        ],
-                        tips: 'Омега-3 из рыбы улучшает состояние суставов и шерсти.'
-                    },
-                    {
-                        id: 27,
-                        name: 'Куриная грудка с кабачком на пару',
-                        category: 'main',
-                        method: 'пар',
-                        time: '25 мин',
-                        tags: ['курица', 'кабачок'],
-                        ingredients: [
-                            { name: 'Курица', weight: 150 },
-                            { name: 'Кабачок', weight: 100 }
-                        ],
-                        steps: [
-                            'Куриную грудку нарезать тонкими пластинами',
-                            'Кабачок очистить, нарезать кружками толщиной 1 см',
-                            'Уложить курицу и кабачок в пароварку',
-                            'Готовить на пару 20 минут',
-                            'Остудить, нарезать на мелкие кусочки',
-                            'При желании слегка размять вилкой'
-                        ],
-                        tips: 'Минимум калорий, максимум белка — идеально для контроля веса.'
-                    },
-                    {
-                        id: 28,
-                        name: 'Говяжий рубец с гречкой',
-                        category: 'main',
-                        method: 'варка',
-                        time: '2 часа',
-                        tags: ['говядина', 'гречка'],
-                        ingredients: [
-                            { name: 'Говядина', weight: 150 },
-                            { name: 'Гречка', weight: 100 }
-                        ],
-                        steps: [
-                            'Рубец тщательно промыть под холодной водой',
-                            'Залить холодной водой, довести до кипения, слить воду',
-                            'Снова залить чистой водой, варить 1.5 часа на медленном огне',
-                            'Вынуть, остудить, нарезать мелкими кусочками',
-                            'В бульон добавить гречку, варить 15 минут',
-                            'Смешать рубец с гречкой, остудить до +37°C'
-                        ],
-                        tips: 'Рубец — натуральный пробиотик, отлично восстанавливает микрофлору кишечника.'
-                    },
-                    {
-                        id: 29,
-                        name: 'Треска с рисом и морковью',
-                        category: 'main',
-                        method: 'варка',
-                        time: '30 мин',
-                        tags: ['рыба', 'рис', 'морковь'],
-                        ingredients: [
-                            { name: 'Рыба белая', weight: 120 },
-                            { name: 'Рис', weight: 80 },
-                            { name: 'Морковь', weight: 50 }
-                        ],
-                        steps: [
-                            'Рыбу промыть, удалить кости',
-                            'Рис промыть до прозрачной воды',
-                            'Морковь натереть на крупной тёрке',
-                            'Рис варить в 200 мл воды 12 минут',
-                            'Рыбу отварить отдельно 10 минут, размять на хлопья',
-                            'Смешать рис, рыбу, морковь',
-                            'Остудить до +37°C'
-                        ],
-                        tips: 'Треска — нежирная рыба, богатая йодом и фосфором.'
-                    },
-                    {
-                        id: 30,
-                        name: 'Куриная печень с рисом',
-                        category: 'main',
-                        method: 'варка',
-                        time: '25 мин',
-                        tags: ['печень', 'рис'],
-                        ingredients: [
-                            { name: 'Печень куриная', weight: 80 },
-                            { name: 'Рис', weight: 100 }
-                        ],
-                        steps: [
-                            'Печень промыть, удалить плёнки',
-                            'Рис промыть до прозрачной воды',
-                            'Отварить рис в 200 мл воды до готовности',
-                            'Печень варить отдельно 15 минут',
-                            'Нарезать печень мелкими кубиками',
-                            'Смешать с рисом, остудить'
-                        ],
-                        tips: 'Не давайте печень чаще 2 раз в неделю — высокий уровень витамина A.'
-                    },
-                    {
-                        id: 31,
-                        name: 'Индейка с тыквой и овсянкой',
-                        category: 'main',
-                        method: 'варка',
-                        time: '40 мин',
-                        tags: ['индейка', 'тыква', 'овсянка'],
-                        ingredients: [
-                            { name: 'Индейка', weight: 150 },
-                            { name: 'Тыква', weight: 80 },
-                            { name: 'Овсянка', weight: 60 }
-                        ],
-                        steps: [
-                            'Индейку нарезать кубиками 2 см',
-                            'Тыкву очистить, нарезать кубиками 1 см',
-                            'В кастрюлю налить 350 мл воды, довести до кипения',
-                            'Добавить индейку, варить 15 минут',
-                            'Добавить тыкву, варить 10 минут',
-                            'Добавить овсянку, варить ещё 8 минут помешивая',
-                            'Размять тыкву вилкой, остудить'
-                        ],
-                        tips: 'Тыква регулирует пищеварение, овсянка даёт длительное насыщение.'
-                    },
-                    {
-                        id: 32,
-                        name: 'Говяжьи сердечки с картофелем',
-                        category: 'main',
-                        method: 'тушение',
-                        time: '50 мин',
-                        tags: ['говядина', 'картофель'],
-                        ingredients: [
-                            { name: 'Говядина', weight: 150 },
-                            { name: 'Картофель', weight: 100 }
-                        ],
-                        steps: [
-                            'Говяжье сердце промыть, удалить жир и крупные сосуды',
-                            'Нарезать небольшими кусочками 2 см',
-                            'Картофель очистить, нарезать кубиками',
-                            'В кастрюлю налить 400 мл воды, добавить сердечки',
-                            'Варить 30 минут',
-                            'Добавить картофель, тушить ещё 20 минут',
-                            'Размять картофель, остудить до +37°C'
-                        ],
-                        tips: 'Сердце — нежирный субпродукт с высоким содержанием таурина.'
-                    },
-                    {
-                        id: 33,
-                        name: 'Яйцо с творогом и грушей',
-                        category: 'snack',
-                        method: 'пюрирование',
-                        time: '10 мин',
-                        tags: ['яйцо', 'творог'],
-                        ingredients: [
-                            { name: 'Яйцо', weight: 50 },
-                            { name: 'Творог 5%', weight: 80 },
-                            { name: 'Груша', weight: 100 }
-                        ],
-                        steps: [
-                            'Яйцо сварить вкрутую (10 минут), очистить',
-                            'Грушу очистить от кожуры и семян',
-                            'Всё пюрировать блендером до однородной массы',
-                            'Подавать комнатной температуры'
-                        ],
-                        tips: 'Груша даёт сладость и клетчатку. Только без семян!'
-                    },
-                    {
-                        id: 34,
-                        name: 'Рыбный суп с овощами',
-                        category: 'broth',
-                        method: 'варка',
-                        time: '35 мин',
-                        tags: ['рыба', 'кабачок', 'морковь'],
-                        ingredients: [
-                            { name: 'Рыба белая', weight: 120 },
-                            { name: 'Кабачок', weight: 70 },
-                            { name: 'Морковь', weight: 50 }
-                        ],
-                        steps: [
-                            'Рыбу промыть, удалить кости, нарезать крупными кусками',
-                            'Овощи очистить, нарезать мелкими кубиками',
-                            'В кастрюлю налить 500 мл воды, довести до кипения',
-                            'Добавить рыбу, варить 10 минут',
-                            'Добавить морковь и кабачок, варить ещё 10 минут',
-                            'Рыбу тщательно проверить на кости, размять',
-                            'Остудить, подавать как жидкое блюдо'
-                        ],
-                        tips: 'Лёгкий суп отлично подходит в жаркую погоду и при снижении аппетита.'
-                    },
-                    {
-                        id: 35,
-                        name: 'Гречневая каша с печенью и брокколи',
-                        category: 'main',
-                        method: 'варка',
-                        time: '30 мин',
-                        tags: ['печень', 'гречка', 'брокколи'],
-                        ingredients: [
-                            { name: 'Печень куриная', weight: 80 },
-                            { name: 'Гречка', weight: 100 },
-                            { name: 'Брокколи', weight: 60 }
-                        ],
-                        steps: [
-                            'Печень промыть, удалить плёнки, нарезать кусочками',
-                            'Гречку промыть до прозрачной воды',
-                            'Брокколи разобрать на небольшие соцветия',
-                            'Гречку варить в 200 мл воды 15 минут',
-                            'Печень варить отдельно 15 минут',
-                            'Брокколи добавить за 7 минут до конца варки гречки',
-                            'Смешать всё, остудить, при желании пюрировать'
-                        ],
-                        tips: 'Брокколи — источник витамина C, полезна для иммунитета.'
-                    },
-                    {
-                        id: 36,
-                        name: 'Индейка с яблоком и рисом',
-                        category: 'main',
-                        method: 'варка',
-                        time: '35 мин',
-                        tags: ['индейка', 'рис'],
-                        ingredients: [
-                            { name: 'Индейка', weight: 150 },
-                            { name: 'Рис', weight: 80 },
-                            { name: 'Яблоко', weight: 100 }
-                        ],
-                        steps: [
-                            'Индейку нарезать кубиками 2 см',
-                            'Яблоко очистить от кожуры и семян, нарезать',
-                            'Рис промыть до прозрачной воды',
-                            'Индейку варить 15 минут в 300 мл воды',
-                            'Добавить рис, варить ещё 15 минут',
-                            'За 5 минут до готовности добавить яблоко',
-                            'Размять вилкой, остудить'
-                        ],
-                        tips: 'Яблоко добавляет мягкую сладость и клетчатку. Без семян!'
-                    },
-                    {
-                        id: 37,
-                        name: 'Куриный бульон с овощами',
-                        category: 'broth',
-                        method: 'варка',
-                        time: '1.5 часа',
-                        tags: ['курица', 'морковь', 'кабачок'],
-                        ingredients: [
-                            { name: 'Курица', weight: 200 },
-                            { name: 'Морковь', weight: 50 },
-                            { name: 'Кабачок', weight: 50 }
-                        ],
-                        steps: [
-                            'Курицу промыть, залить холодной водой (800 мл)',
-                            'Довести до кипения, снять пену, убавить огонь',
-                            'Варить 1 час на медленном огне',
-                            'Добавить целую морковь и кабачок, варить ещё 20 минут',
-                            'Процедить бульон, мясо отделить от костей',
-                            'Овощи размять, смешать с мясом',
-                            'Подавать тёплым как самостоятельное блюдо'
-                        ],
-                        tips: 'Куриный бульон помогает при недомогании и снижении аппетита.'
-                    },
-                    {
-                        id: 38,
-                        name: 'Творожные шарики с морковью',
-                        category: 'snack',
-                        method: 'без варки',
-                        time: '15 мин',
-                        tags: ['творог', 'морковь'],
-                        ingredients: [
-                            { name: 'Творог 5%', weight: 100 },
-                            { name: 'Морковь', weight: 60 },
-                            { name: 'Яйцо', weight: 50 }
-                        ],
-                        steps: [
-                            'Морковь натереть на мелкой тёрке, отжать сок',
-                            'Смешать творог, морковь и яйцо до однородности',
-                            'Скатать шарики диаметром 2–3 см',
-                            'Охладить в холодильнике 30 минут перед подачей'
-                        ],
-                        tips: 'Хранить до 24 часов в холодильнике. Без соли и сахара!'
-                    },
-                    {
-                        id: 39,
-                        name: 'Говядина с тыквой и зеленью',
-                        category: 'main',
-                        method: 'тушение',
-                        time: '50 мин',
-                        tags: ['говядина', 'тыква', 'зелень'],
-                        ingredients: [
-                            { name: 'Говядина', weight: 150 },
-                            { name: 'Тыква', weight: 100 },
-                            { name: 'Зелень', weight: 20 }
-                        ],
-                        steps: [
-                            'Говядину нарезать кубиками 2 см',
-                            'Тыкву очистить, нарезать кубиками 1 см',
-                            'В кастрюлю налить 300 мл воды, добавить говядину',
-                            'Варить 25 минут',
-                            'Добавить тыкву, тушить ещё 20 минут',
-                            'Тыква должна полностью размягчиться',
-                            'Добавить мелко рубленую зелень, остудить'
-                        ],
-                        tips: 'Тыква превращается в соус — блюдо получается сочным без добавления масла.'
-                    },
-                    {
-                        id: 40,
-                        name: 'Паштет из говяжьей печени',
-                        category: 'appetizer',
-                        method: 'варка',
-                        time: '30 мин',
-                        tags: ['печень', 'морковь'],
-                        ingredients: [
-                            { name: 'Печень куриная', weight: 100 },
-                            { name: 'Морковь', weight: 60 },
-                            { name: 'Яйцо', weight: 50 }
-                        ],
-                        steps: [
-                            'Печень промыть, удалить плёнки',
-                            'Морковь очистить, нарезать кружками',
-                            'Яйцо сварить вкрутую',
-                            'Печень и морковь отварить 20 минут',
-                            'Все ингредиенты пюрировать блендером',
-                            'При необходимости добавить немного бульона для консистенции',
-                            'Охладить, разложить порциями'
-                        ],
-                        tips: 'Паштет замораживается порционно в формочках для льда.'
-                    },
-                    {
-                        id: 41,
-                        name: 'Рис с яйцом и кабачком',
-                        category: 'main',
-                        method: 'варка',
-                        time: '25 мин',
-                        tags: ['рис', 'яйцо', 'кабачок'],
-                        ingredients: [
-                            { name: 'Рис', weight: 100 },
-                            { name: 'Яйцо', weight: 50 },
-                            { name: 'Кабачок', weight: 80 }
-                        ],
-                        steps: [
-                            'Рис промыть, варить в 200 мл воды 12 минут',
-                            'Кабачок натереть на крупной тёрке',
-                            'Добавить кабачок к рису, варить ещё 5 минут',
-                            'Яйцо взбить, влить тонкой струйкой в кашу',
-                            'Помешивать 2 минуты на огне',
-                            'Остудить до +37°C'
-                        ],
-                        tips: 'Лёгкое блюдо, хорошо усваивается при расстройствах пищеварения.'
-                    },
-                    {
-                        id: 42,
-                        name: 'Куриный фарш с брокколи и картофелем',
-                        category: 'main',
-                        method: 'варка',
-                        time: '30 мин',
-                        tags: ['курица', 'брокколи', 'картофель'],
-                        ingredients: [
-                            { name: 'Курица', weight: 150 },
-                            { name: 'Брокколи', weight: 60 },
-                            { name: 'Картофель', weight: 100 }
-                        ],
-                        steps: [
-                            'Курицу пропустить через мясорубку',
-                            'Картофель очистить, нарезать мелкими кубиками',
-                            'Брокколи разобрать на маленькие соцветия',
-                            'В кастрюлю налить 400 мл воды, добавить картофель',
-                            'Варить 10 минут, добавить фарш, разбивая комки',
-                            'Добавить брокколи, варить ещё 10 минут',
-                            'Размешать, остудить'
-                        ],
-                        tips: 'Фарш быстрее готовится и легче переваривается, чем куски мяса.'
-                    },
-                    {
-                        id: 43,
-                        name: 'Отварная рыба с тыквой',
-                        category: 'main',
-                        method: 'варка',
-                        time: '25 мин',
-                        tags: ['рыба', 'тыква'],
-                        ingredients: [
-                            { name: 'Рыба белая', weight: 150 },
-                            { name: 'Тыква', weight: 100 }
-                        ],
-                        steps: [
-                            'Рыбу тщательно проверить на кости, нарезать кусками',
-                            'Тыкву очистить, нарезать кубиками 2 см',
-                            'В кастрюлю налить 300 мл воды, довести до кипения',
-                            'Добавить тыкву, варить 10 минут',
-                            'Добавить рыбу, варить ещё 10 минут',
-                            'Тыкву размять в пюре, рыбу разобрать на хлопья',
-                            'Смешать, остудить'
-                        ],
-                        tips: 'Сочетание рыбы и тыквы — отличный источник каротина и омега-3.'
-                    },
-                    {
-                        id: 44,
-                        name: 'Гречка с яйцом и зеленью',
-                        category: 'main',
-                        method: 'варка',
-                        time: '20 мин',
-                        tags: ['гречка', 'яйцо', 'зелень'],
-                        ingredients: [
-                            { name: 'Гречка', weight: 120 },
-                            { name: 'Яйцо', weight: 100 },
-                            { name: 'Зелень', weight: 20 }
-                        ],
-                        steps: [
-                            'Гречку промыть, варить в 250 мл воды 15 минут',
-                            'Яйца сварить вкрутую, очистить, нарезать мелко',
-                            'Добавить яйца в готовую гречку',
-                            'Зелень мелко нарубить, добавить к каше',
-                            'Перемешать, остудить до +37°C'
-                        ],
-                        tips: 'Два яйца дают полноценный набор аминокислот к гречке.'
-                    },
-                    {
-                        id: 45,
-                        name: 'Говядина с морковью и картофелем (щадящий)',
-                        category: 'main',
-                        method: 'тушение',
-                        time: '1 час',
-                        tags: ['говядина', 'морковь', 'картофель'],
-                        ingredients: [
-                            { name: 'Говядина', weight: 150 },
-                            { name: 'Морковь', weight: 60 },
-                            { name: 'Картофель', weight: 100 }
-                        ],
-                        steps: [
-                            'Говядину нарезать кубиками 2 см',
-                            'Морковь нарезать кружками, картофель — кубиками',
-                            'В кастрюлю налить 500 мл воды, добавить говядину',
-                            'Варить 30 минут на медленном огне',
-                            'Добавить морковь и картофель',
-                            'Тушить ещё 25 минут до полной мягкости',
-                            'Всё пюрировать, остудить — идеально для пожилых собак'
-                        ],
-                        tips: 'Пюреобразная консистенция облегчает жевание и пищеварение у пожилых.'
-                    },
-                    {
-                        id: 46,
-                        name: 'Паровая рыба с рисом и морковью',
-                        category: 'main',
-                        method: 'пар',
-                        time: '30 мин',
-                        tags: ['рыба', 'рис', 'морковь'],
-                        ingredients: [
-                            { name: 'Рыба белая', weight: 120 },
-                            { name: 'Рис', weight: 80 },
-                            { name: 'Морковь', weight: 50 }
-                        ],
-                        steps: [
-                            'Рыбу промыть, удалить кости',
-                            'Рис промыть, отварить до готовности',
-                            'Морковь натереть на мелкой тёрке, потушить 5 минут в воде',
-                            'Рыбу готовить на пару 15 минут',
-                            'Разобрать рыбу на хлопья',
-                            'Смешать рис, рыбу, морковь',
-                            'Остудить до +37°C'
-                        ],
-                        tips: 'Пар сохраняет все питательные вещества рыбы без лишних жиров.'
-                    },
-                    {
-                        id: 47,
-                        name: 'Индейка с гречкой и яблоком',
-                        category: 'main',
-                        method: 'варка',
-                        time: '40 мин',
-                        tags: ['индейка', 'гречка'],
-                        ingredients: [
-                            { name: 'Индейка', weight: 150 },
-                            { name: 'Гречка', weight: 100 },
-                            { name: 'Яблоко', weight: 80 }
-                        ],
-                        steps: [
-                            'Индейку нарезать кубиками 2 см',
-                            'Яблоко очистить, удалить семена, нарезать мелко',
-                            'Гречку промыть',
-                            'Индейку варить 15 минут в 350 мл воды',
-                            'Добавить гречку, варить ещё 15 минут',
-                            'За 5 минут до готовности добавить яблоко',
-                            'Остудить, слегка размять'
-                        ],
-                        tips: 'Яблоко создаёт приятный аромат и мягкую кислинку.'
-                    },
-                    {
-                        id: 48,
-                        name: 'Овощное пюре с яйцом',
-                        category: 'snack',
-                        method: 'варка',
-                        time: '20 мин',
-                        tags: ['кабачок', 'брокколи', 'яйцо'],
-                        ingredients: [
-                            { name: 'Кабачок', weight: 100 },
-                            { name: 'Брокколи', weight: 80 },
-                            { name: 'Яйцо', weight: 50 }
-                        ],
-                        steps: [
-                            'Кабачок очистить, нарезать кубиками',
-                            'Брокколи разобрать на соцветия',
-                            'Отварить овощи в минимуме воды до мягкости (12 мин)',
-                            'Яйцо взбить, добавить к овощам',
-                            'Готовить на огне 2 минуты, помешивая',
-                            'Пюрировать, остудить'
-                        ],
-                        tips: 'Полностью овощное блюдо — подходит для разгрузочных дней.'
-                    },
-                    {
-                        id: 49,
-                        name: 'Куриные желудочки с рисом',
-                        category: 'main',
-                        method: 'тушение',
-                        time: '1.5 часа',
-                        tags: ['курица', 'рис'],
-                        ingredients: [
-                            { name: 'Курица', weight: 150 },
-                            { name: 'Рис', weight: 100 }
-                        ],
-                        steps: [
-                            'Куриные желудочки тщательно промыть, удалить плёнки',
-                            'Нарезать на небольшие кусочки',
-                            'Залить водой (400 мл), варить 1 час на медленном огне',
-                            'Промыть рис, добавить к желудочкам',
-                            'Варить ещё 15–20 минут до готовности риса',
-                            'Остудить, нарезать мельче для пожилых собак'
-                        ],
-                        tips: 'Желудочки богаты глюкозамином — полезны для суставов.'
-                    },
-                    {
-                        id: 50,
-                        name: 'Праздничная тарелка: рыба, творог, яблоко',
-                        category: 'snack',
-                        method: 'смешанный',
-                        time: '20 мин',
-                        tags: ['рыба', 'творог'],
-                        ingredients: [
-                            { name: 'Рыба белая', weight: 80 },
-                            { name: 'Творог 5%', weight: 60 },
-                            { name: 'Яблоко', weight: 80 }
-                        ],
-                        steps: [
-                            'Рыбу отварить на пару 10 минут, остудить',
-                            'Яблоко очистить, удалить семена',
-                            'Рыбу разобрать на хлопья',
-                            'Яблоко натереть на мелкой тёрке',
-                            'Смешать рыбу, творог и яблоко',
-                            'Подавать комнатной температуры как особое угощение'
-                        ],
-                        tips: 'Для особых случаев — дня рождения или визита к ветеринару 🎉'
-                    }
-                ];
-        
-        function findBestRecipe(components) {
-                    const selectedTags = components.map(c => {
-                        const name = c.name.toLowerCase();
-                        if (name.includes('курица') || name.includes('индейка')) return 'мясо';
-                        if (name.includes('говядина')) return 'говядина';
-                        if (name.includes('печень')) return 'печень';
-                        if (name.includes('рыба')) return 'рыба';
-                        if (name.includes('творог')) return 'творог';
-                        if (name.includes('яйцо')) return 'яйцо';
-                        if (name.includes('рис')) return 'рис';
-                        if (name.includes('гречка')) return 'гречка';
-                        if (name.includes('овсянка')) return 'овсянка';
-                        if (name.includes('картофель')) return 'картофель';
-                        if (name.includes('морковь')) return 'морковь';
-                        if (name.includes('тыква')) return 'тыква';
-                        if (name.includes('кабачок')) return 'кабачок';
-                        if (name.includes('брокколи')) return 'брокколи';
-                        if (name.includes('яблоко')) return 'яблоко';
-                        if (name.includes('груша')) return 'груша';
-                        if (name.includes('зелень')) return 'зелень';
-                        return name;
-                    });
+    // ─── RECIPES ─────────────────────────────────────────────────────────────
+    function saveRecipe(text) {
+        const recipe = { text, date: new Date().toLocaleDateString('ru') };
+        state.recipes.unshift(recipe);
+        if (state.recipes.length > 10) state.recipes = state.recipes.slice(0, 10);
+        save();
+        renderSavedRecipes();
+    }
 
-                    let bestRecipe = null;
-                    let bestScore = -1;
+    function clearRecipes() {
+        state.recipes = [];
+        save();
+        renderSavedRecipes();
+    }
 
-                    for (const recipe of recipeLibrary) {
-                        let score = 0;
-                        for (const tag of selectedTags) {
-                            // Exact match on recipe tags
-                            if (recipe.tags.some(rt => rt.includes(tag) || tag.includes(rt))) {
-                                score += 3;
-                            }
-                        }
-                        // Bonus for exact match count
-                        const matchedTags = recipe.tags.filter(rt =>
-                            selectedTags.some(st => rt.includes(st) || st.includes(rt))
-                        ).length;
-                        score += matchedTags * 2;
-                        // Primary protein match gets extra weight
-                        if (recipe.tags.some(rt => ['мясо', 'говядина', 'печень', 'рыба'].includes(rt))) {
-                            if (selectedTags.some(st => ['мясо', 'говядина', 'печень', 'рыба'].includes(st))) {
-                                score += 5;
-                            }
-                        }
-                        if (score > bestScore) {
-                            bestScore = score;
-                            bestRecipe = recipe;
-                        }
-                    }
+    function renderSavedRecipes() {
+        const section = document.getElementById('saved-recipes-section');
+        const list = document.getElementById('saved-recipes-list');
+        if (!section || !list) return;
+        if (!state.recipes.length) { section.classList.add('hidden'); return; }
+        section.classList.remove('hidden');
+        list.innerHTML = state.recipes.map((r, i) =>
+            `<div class="glass p-3 rounded-xl text-sm">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-xs text-gray-500">${r.date}</span>
+                    <button onclick="deleteRecipe(${i})" class="text-gray-600 hover:text-red-400 text-xs">✕</button>
+                </div>
+                <p class="text-gray-300 text-xs leading-relaxed">${r.text.slice(0, 120)}${r.text.length > 120 ? '…' : ''}</p>
+            </div>`
+        ).join('');
+    }
 
-                    // Fallback to any recipe if nothing matched
-                    if (!bestRecipe || bestScore === 0) {
-                        bestRecipe = recipeLibrary[Math.floor(Math.random() * recipeLibrary.length)];
-                    }
+    function deleteRecipe(i) {
+        state.recipes.splice(i, 1);
+        save();
+        renderSavedRecipes();
+    }
 
-                    return bestRecipe;
-                }
+    // ─── GENERATOR ───────────────────────────────────────────────────────────
+    let selectedComponents = [];
 
-                function generateRecipe() {
-                    if (selectedComponents.length < 2) {
-                        showToast('Выберите минимум 2 компонента', 'error');
-                        return;
-                    }
+    function toggleGenerator() {
+        const panel = document.getElementById('generator-panel');
+        const icon = document.getElementById('gen-toggle-icon');
+        panel.classList.toggle('hidden');
+        icon.className = panel.classList.contains('hidden') ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+    }
 
-                    const recipe = findBestRecipe(selectedComponents);
-                    const totalCals = selectedComponents.reduce((s, c) => s + Math.round((c.calsPer100g / 100) * c.weight), 0);
-                    const totalWeight = selectedComponents.reduce((s, c) => s + c.weight, 0);
-                    const percent = Math.round((totalCals / dailyNorm) * 100);
+    function addComponent(name, calsper100, emoji, defaultWeight) {
+        const existing = selectedComponents.find(c => c.name === name);
+        if (existing) { existing.weight += defaultWeight; }
+        else { selectedComponents.push({ name, calsper100, emoji, weight: defaultWeight }); }
+        updateSelectedList();
+    }
 
-                    const methodLabel = {
-                        'варка': 'Отваривание',
-                        'пар': 'На пару',
-                        'тушение': 'Тушение',
-                        'запекание': 'Запекание',
-                        'блендер': 'Блендер',
-                        'пюрирование': 'Пюрирование'
-                    }[recipe.method] || recipe.method;
+    function addCustomComponent() {
+        const name = document.getElementById('custom-component').value.trim();
+        const cals = parseFloat(document.getElementById('custom-cals').value);
+        const weight = parseFloat(document.getElementById('custom-weight').value) || 100;
+        if (!name || !cals) { showToast('Заполните название и калории', '#ef4444'); return; }
+        addComponent(name, cals, '🍽', weight);
+        document.getElementById('custom-component').value = '';
+        document.getElementById('custom-cals').value = '';
+    }
 
-                    const stepsHtml = recipe.steps.map((step, i) => `
-                        <div class="flex gap-3 items-start">
-                            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-xs font-bold text-white mt-0.5">${i + 1}</div>
-                            <p class="text-sm text-gray-300 leading-relaxed">${step}</p>
-                        </div>
-                    `).join('<div class="h-2"></div>');
+    function clearComponents() {
+        selectedComponents = [];
+        updateSelectedList();
+    }
 
-                    document.getElementById('recipe-result').innerHTML = `
-                        <div class="border border-green-500/30 rounded-2xl overflow-hidden">
-                            <!-- Header -->
-                            <div class="bg-gradient-to-r from-green-500/10 to-orange-500/10 p-5 border-b border-white/5">
-                                <div class="flex items-start justify-between mb-2">
-                                    <div class="flex-1">
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <span class="text-xs px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 font-medium">${methodLabel}</span>
-                                            <span class="text-xs text-gray-500">⏱ ${recipe.time}</span>
-                                        </div>
-                                        <h4 class="text-lg font-bold text-white leading-tight">${recipe.name}</h4>
-                                    </div>
-                                    <div class="text-right ml-4">
-                                        <div class="text-2xl font-bold text-orange-400">~${totalCals}</div>
-                                        <div class="text-xs text-gray-500">ккал</div>
-                                    </div>
-                                </div>
+    function updateSelectedList() {
+        const list = document.getElementById('selected-list');
+        const totalCalsEl = document.getElementById('total-cals');
+        const totalWeightEl = document.getElementById('total-weight');
+        const normProgress = document.getElementById('norm-progress');
+        const normPercent = document.getElementById('norm-percent');
+        const norm = state.settings.cals;
 
-                                <!-- Nutrition bar -->
-                                <div class="mt-3 h-2 bg-gray-700/50 rounded-full">
-                                    <div class="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full transition-all" style="width: ${Math.min(percent, 100)}%"></div>
-                                </div>
-                                <div class="flex justify-between mt-1 text-xs text-gray-500">
-                                    <span>${totalWeight} г</span>
-                                    <span>${percent}% от дневной нормы</span>
-                                </div>
-                            </div>
-
-                            <!-- Ingredients match -->
-                            <div class="px-5 py-3 border-b border-white/5">
-                                <div class="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                                    <i class="fas fa-lemon text-green-400"></i>Ингредиенты в рецепте
-                                </div>
-                                <div class="flex flex-wrap gap-2">
-                                    ${recipe.ingredients.map(ing => `
-                                        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10">
-                                            <span class="text-sm">${selectedComponents.find(c => c.name.toLowerCase().includes(ing.name.toLowerCase().split(' ')[0]))?.emoji || '🍽️'}</span>
-                                            <span class="text-xs text-gray-300">${ing.name}</span>
-                                            <span class="text-xs text-gray-600">${ing.weight}г</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-
-                            <!-- Steps -->
-                            <div class="px-5 py-4">
-                                <div class="flex items-center gap-2 text-xs text-gray-500 mb-3">
-                                    <i class="fas fa-list-ol text-blue-400"></i>Приготовление
-                                </div>
-                                <div class="space-y-3">
-                                    ${stepsHtml}
-                                </div>
-                            </div>
-
-                            <!-- Tips -->
-                            ${recipe.tips ? `
-                            <div class="px-5 pb-4">
-                                <div class="flex gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                                    <i class="fas fa-lightbulb text-amber-400 mt-0.5 flex-shrink-0"></i>
-                                    <p class="text-xs text-amber-200/80 leading-relaxed">${recipe.tips}</p>
-                                </div>
-                            </div>
-                            ` : ''}
-                        </div>
-
-                        <div class="flex gap-2 mt-4">
-                            <button onclick="generateRecipe()" class="flex-1 py-2.5 btn-ghost text-sm flex items-center justify-center gap-2">
-                                <i class="fas fa-shuffle"></i>Другой рецепт
-                            </button>
-                            <button onclick="saveRecipe()" class="flex-1 py-2.5 bg-gradient-to-r from-green-500/80 to-emerald-500/80 rounded-xl font-medium text-sm flex items-center justify-center gap-2 hover:from-green-500 hover:to-emerald-500 transition">
-                                <i class="fas fa-bookmark"></i>Сохранить
-                            </button>
-                        </div>
-                    `;
-
-                    document.getElementById('recipe-result').classList.remove('hidden');
-                    document.getElementById('recipe-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    showToast('Рецепт подобран!', 'success');
-                }
-        
-        function saveRecipe() {
-            showToast('Рецепт сохранён!', 'success');
-        }
-        
-
-        
-        function toggleReminder(el) {
-            el.classList.toggle('active');
-            el.setAttribute('data-active', el.classList.contains('active'));
-        }
-        
-        function saveReminder(id) {
-            showToast('Напоминание сохранено!', 'success');
-        }
-        
-        function editMedicine(id) {
-            openModal('medicine-modal');
-        }
-        
-
-        
-
-        
-        function openModal(id) {
-            document.getElementById(id).classList.add('active');
-        }
-        
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
-        }
-        
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', e => {
-                if (e.target === modal) closeModal(modal.id);
-            });
-        });
-        
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-blue-600' };
-            const toast = document.createElement('div');
-            toast.className = `toast ${colors[type]}`;
-            toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation' : 'info'}-circle mr-2"></i>${message}`;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-        
-        document.querySelectorAll('a[href^="#"]').forEach(a => {
-            a.addEventListener('click', e => {
-                e.preventDefault();
-                document.querySelector(a.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
-            });
-        });
-        
-
-        function saveSettings() {
-            const cals = parseInt(document.getElementById('setting-cals').value) || 870;
-            const name = document.getElementById('setting-name').value.trim() || 'Арчибальд';
-            const age  = parseInt(document.getElementById('setting-age').value) || 12;
-            const weight = parseFloat(document.getElementById('setting-weight').value) || 21.5;
-            const settings = { cals, name, age, weight };
-            localStorage.setItem('archie_settings', JSON.stringify(settings));
-            dailyNorm = cals;
-            document.getElementById('daily-norm').textContent = cals + ' ккал';
-            updateComponentsList();
-            // Update hero stats
-            document.querySelectorAll('.gradient-text').forEach((el, i) => {
-                if (i === 0) el.textContent = name;
-            });
-            const statEls = document.querySelectorAll('.glass-card .gradient-text');
-            if (statEls[0]) statEls[0].textContent = age;
-            if (statEls[1]) statEls[1].textContent = weight.toFixed(1);
-            showToast('Настройки сохранены!', 'success');
-            closeModal('settings-modal');
+        if (!selectedComponents.length) {
+            list.innerHTML = '<span class="text-sm text-gray-400">Нажмите на компоненты...</span>';
+            totalCalsEl.textContent = '0 ккал';
+            totalWeightEl.textContent = '0 г';
+            normProgress.style.width = '0%';
+            normPercent.textContent = '0% от дневной нормы';
+            return;
         }
 
-        function saveWeight(e) {
-            e.preventDefault();
-            const weight = parseFloat(document.getElementById('weight-value').value);
-            const date   = document.getElementById('weight-date').value;
-            if (!weight || !date) return showToast('Заполните все поля', 'error');
-            const history = JSON.parse(localStorage.getItem('archie_weight') || '[]');
-            history.push({ weight, date });
-            history.sort((a, b) => a.date.localeCompare(b.date));
-            if (history.length > 12) history.splice(0, history.length - 12);
-            localStorage.setItem('archie_weight', JSON.stringify(history));
-            renderWeightChart(history);
-            showToast(`Вес ${weight} кг записан на ${formatDate(date)}`, 'success');
-            closeModal('weight-modal');
-            e.target.reset();
-            document.getElementById('weight-date').valueAsDate = new Date();
-        }
+        let totalCals = 0, totalW = 0;
+        list.innerHTML = selectedComponents.map((c, i) => {
+            const cal = Math.round(c.calsper100 * c.weight / 100);
+            totalCals += cal; totalW += c.weight;
+            return `<div class="flex items-center justify-between gap-2">
+                <span class="text-sm">${c.emoji} ${c.name}</span>
+                <div class="flex items-center gap-2">
+                    <button onclick="changeWeight(${i},-10)" class="text-gray-400 hover:text-white text-xs px-1">−</button>
+                    <input type="number" value="${c.weight}" min="10" max="500" step="10"
+                        onchange="selectedComponents[${i}].weight=parseInt(this.value)||50; updateSelectedList();"
+                        class="w-16 bg-transparent border border-white/20 rounded px-2 py-0.5 text-xs text-center focus:outline-none">
+                    <span class="text-xs text-gray-500">г</span>
+                    <button onclick="changeWeight(${i},10)" class="text-gray-400 hover:text-white text-xs px-1">+</button>
+                    <span class="text-xs text-orange-400 w-14 text-right">${cal} ккал</span>
+                    <button onclick="selectedComponents.splice(${i},1); updateSelectedList();" class="text-gray-600 hover:text-red-400 text-xs ml-1">✕</button>
+                </div>
+            </div>`;
+        }).join('');
 
-        function saveMedicine(e) {
-            e.preventDefault();
-            const name     = document.getElementById('med-name').value.trim();
-            const dosage   = document.getElementById('med-dosage').value.trim();
-            const times    = document.getElementById('med-times').value.trim();
-            const reminder = document.getElementById('med-reminder').value.trim();
-            if (!name || !dosage || !times) return showToast('Заполните обязательные поля', 'error');
-            const medicines = JSON.parse(localStorage.getItem('archie_medicines') || '[]');
-            medicines.push({ name, dosage, times: times.split(',').map(t => t.trim()), reminder, id: Date.now() });
-            localStorage.setItem('archie_medicines', JSON.stringify(medicines));
-            renderMedicines(medicines);
-            showToast(`${name} сохранён!`, 'success');
-            closeModal('medicine-modal');
-            e.target.reset();
-        }
+        totalCalsEl.textContent = totalCals + ' ккал';
+        totalWeightEl.textContent = totalW + ' г';
+        const pct = Math.min(Math.round(totalCals / norm * 100), 100);
+        normProgress.style.width = pct + '%';
+        normPercent.textContent = pct + '% от дневной нормы';
+    }
 
-        function deleteMedicine(id) {
-            const medicines = JSON.parse(localStorage.getItem('archie_medicines') || '[]')
-                .filter(m => m.id !== id);
-            localStorage.setItem('archie_medicines', JSON.stringify(medicines));
-            renderMedicines(medicines);
-            showToast('Лекарство удалено', 'info');
-        }
+    function changeWeight(i, delta) {
+        selectedComponents[i].weight = Math.max(10, selectedComponents[i].weight + delta);
+        updateSelectedList();
+    }
 
-        function formatDate(dateStr) {
-            const [y, m, d] = dateStr.split('-');
-            return d + '.' + m;
-        }
+    const recipes25 = [
+        "Отварить курицу и рис раздельно. Смешать с тёртой морковью. Подавать тёплым.",
+        "Говядину отварить, измельчить. Добавить отварную гречку и тушёную тыкву. Перемешать.",
+        "Печень куриную отварить 15 мин. Смешать с варёным картофелем и зеленью.",
+        "Рыбу (без костей) отварить. Смешать с отварным рисом и натёртым кабачком.",
+        "Индейку отварить, нарезать. Добавить отварную овсянку и брокколи. Перемешать.",
+        "Творог смешать с тёртым яблоком и грушей. Подавать как отдельный приём пищи.",
+        "Яйцо сварить вкрутую, нарезать. Смешать с отварной гречкой и морковью.",
+        "Говядину нарезать кусочками, тушить 20 мин с кабачком. Добавить варёный рис.",
+        "Курицу измельчить в фарш, отварить. Смешать с тыквой и зеленью.",
+        "Рыбу отварить, разобрать. Перемешать с картофельным пюре без масла.",
+        "Индейку с овсянкой отварить вместе. Добавить тёртую морковь перед подачей.",
+        "Печень говяжью отварить, измельчить. Смешать с рисом и брокколи.",
+        "Творог смешать с варёной гречкой. Добавить мелко нарезанную зелень.",
+        "Курицу и картофель отварить. Перемешать с тушёным кабачком.",
+        "Яйцо взбить и запечь омлет без масла. Подавать с тёртой морковью.",
+        "Говяжий фарш отварить, раскрошить. Смешать с отварным рисом и тыквой.",
+        "Рыбу запечь в фольге 20 мин. Смешать с отварной гречкой и зеленью.",
+        "Индейку отварить с брокколи. Добавить немного творога для белка.",
+        "Куриную грудку нарезать тонко, отварить. Подавать с яблоком и овсянкой.",
+        "Печень куриную обварить кипятком, измельчить. Смешать с картофелем и кабачком.",
+        "Говядину нарезать, отварить 30 мин. Добавить гречку и груши без косточек.",
+        "Творог перемешать с тёртым кабачком и зеленью. Подавать охлаждённым.",
+        "Рыбу белую отварить с морковью. Перемешать и подавать с рисом.",
+        "Индейку с тыквой тушить 25 мин. Добавить отварную овсянку.",
+        "Яйцо отварить, нарезать. Смешать с гречкой, морковью и зеленью."
+    ];
 
-        function renderWeightChart(history) {
-            if (!history || history.length === 0) return;
-            const container = document.querySelector('#health .h-48');
-            if (!container) return;
-            const maxW = Math.max(...history.map(h => h.weight));
-            const minW = Math.min(...history.map(h => h.weight));
-            const range = maxW - minW || 1;
-            const maxBarH = 160;
-            const minBarH = 24;
-            container.innerHTML = history.map((h, i) => {
-                const isLast = i === history.length - 1;
-                const barH = Math.round(minBarH + ((h.weight - minW) / range) * (maxBarH - minBarH));
-                const barClass = isLast ? 'bar-energy' : 'bar-activity';
-                const labelClass = isLast ? 'text-green-400 font-bold' : 'text-gray-500';
-                const valClass   = isLast ? 'text-green-400' : '';
-                return `<div class="flex-1 flex flex-col items-center">
-                    <div class="w-full rounded-t-lg bar ${barClass}" style="height:${barH}px"></div>
-                    <p class="mt-2 text-xs ${labelClass}">${isLast ? 'Сегодня' : formatDate(h.date)}</p>
-                    <p class="text-xs ${valClass}">${h.weight} кг</p>
-                </div>`;
-            }).join('');
-        }
+    function generateRecipe() {
+        if (!selectedComponents.length) { showToast('Выберите компоненты', '#f97316'); return; }
+        const names = selectedComponents.map(c => `${c.emoji} ${c.name} (${c.weight}г)`).join(', ');
+        const totalCals = selectedComponents.reduce((s,c) => s + Math.round(c.calsper100*c.weight/100), 0);
+        const baseRecipe = recipes25[Math.floor(Math.random() * recipes25.length)];
+        const text = `Состав: ${names}.\n\n${baseRecipe}\n\n🔥 Итого: ${totalCals} ккал`;
 
-        const timeLabels = { '09:00': ['fas fa-sun', 'text-yellow-400', 'Утро'],
-                             '18:00': ['fas fa-cloud-sun', 'text-orange-400', 'День'],
-                             '21:00': ['fas fa-moon', 'text-blue-400', 'Вечер'],
-                             '12:00': ['fas fa-cloud-sun', 'text-orange-400', 'День'] };
+        const result = document.getElementById('recipe-result');
+        result.classList.remove('hidden');
+        result.innerHTML = `<div class="glass p-4 rounded-xl">
+            <div class="flex justify-between items-center mb-2">
+                <p class="text-sm font-semibold text-orange-400">Рецепт готов!</p>
+                <button onclick="saveRecipe(this.closest('.glass').querySelector('pre').textContent)" class="text-xs btn-ghost text-green-400">💾 Сохранить</button>
+            </div>
+            <pre class="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">${text}</pre>
+        </div>`;
 
-        function renderMedicines(medicines) {
-            const list = document.getElementById('medicine-list');
-            if (!list) return;
-            // Keep the first 2 static cards, append dynamic ones after
-            const staticCards = list.querySelectorAll('.glass-card:not([data-dynamic])');
-            // Remove only dynamic cards
-            list.querySelectorAll('[data-dynamic]').forEach(el => el.remove());
-            medicines.forEach(med => {
-                const card = document.createElement('div');
-                card.className = 'glass-card rounded-3xl p-6';
-                card.dataset.dynamic = '1';
-                const timesHtml = med.times.map(t => {
-                    const [icon, color, label] = timeLabels[t] || ['fas fa-clock', 'text-gray-400', t];
-                    return `<div class="flex justify-between items-center glass p-3 rounded-xl">
-                        <div class="flex items-center gap-3"><i class="${icon} ${color}"></i><span>${label}</span></div>
-                        <span class="font-semibold">${t}</span></div>`;
-                }).join('');
-                card.innerHTML = `
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-2xl bg-green-500/20 flex items-center justify-center">
-                                <i class="fas fa-capsules text-green-400"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-semibold">${med.name}</h3>
-                                <p class="text-sm text-gray-500">${med.dosage}</p>
-                            </div>
-                        </div>
-                        <button onclick="deleteMedicine(${med.id})" class="text-gray-500 hover:text-red-400">
-                            <i class="fas fa-trash text-sm"></i>
-                        </button>
-                    </div>
-                    <div class="space-y-2 mb-4">${timesHtml}</div>
-                    ${med.reminder ? `<div class="border-t border-white/10 pt-4 text-sm text-gray-500">
-                        <i class="fas fa-bell mr-2 text-green-400"></i>${med.reminder}</div>` : ''}
-                `;
-                list.appendChild(card);
-            });
-        }
+        showToast('🍽 Рецепт сгенерирован!', '#f97316');
+    }
 
-        // ==========================================
-        // ИНИЦИАЛИЗАЦИЯ: загрузка из localStorage
-        // ==========================================
-        document.addEventListener('DOMContentLoaded', () => {
-            // Settings
-            const saved = JSON.parse(localStorage.getItem('archie_settings') || 'null');
-            if (saved) {
-                if (saved.cals) { document.getElementById('setting-cals').value = saved.cals; dailyNorm = saved.cals; document.getElementById('daily-norm').textContent = saved.cals + ' ккал'; }
-                if (saved.name) document.getElementById('setting-name').value = saved.name;
-                if (saved.age)  document.getElementById('setting-age').value  = saved.age;
-                if (saved.weight) document.getElementById('setting-weight').value = saved.weight;
-            }
-            // Weight history
-            const wHistory = JSON.parse(localStorage.getItem('archie_weight') || '[]');
-            if (wHistory.length > 0) renderWeightChart(wHistory);
-            // Medicines
-            const meds = JSON.parse(localStorage.getItem('archie_medicines') || '[]');
-            if (meds.length > 0) renderMedicines(meds);
-            // Today's date for weight form
-            document.getElementById('weight-date').valueAsDate = new Date();
-        });
+    // ─── MODAL ────────────────────────────────────────────────────────────────
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
+    // ─── TOAST ───────────────────────────────────────────────────────────────
+    function showToast(msg, color = '#3b82f6') {
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.style.background = color;
+        t.textContent = msg;
+        document.getElementById('toast-container').appendChild(t);
+        setTimeout(() => t.remove(), 3200);
+    }
+
+    // ─── REMINDER (UI only) ──────────────────────────────────────────────────
+    function toggleReminder(el) { el.classList.toggle('active'); }
+    function saveReminder(idx) { showToast('🔔 Напоминание сохранено', '#8b5cf6'); }
+    function editMedicine(idx) { showToast('Редактирование — скоро', '#6b7280'); }
     </script>
 </body>
 </html>
