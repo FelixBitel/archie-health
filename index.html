@@ -407,7 +407,7 @@
                             <p class="text-xs text-gray-500 mb-2">Свой компонент (ккал/100г):</p>
                             <div class="flex gap-2">
                                 <input type="text" id="custom-component" placeholder="Название" class="flex-1 bg-transparent border border-white/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-500">
-                                <input type="number" id="custom-cals" placeholder="ккал" class="w-20 bg-transparent border border-white/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-500">
+                                <input type="number" id="custom-type" class="bg-transparent border border-white/20 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-orange-500 text-gray-400">                     <option value="protein">🥩 Белок</option>                     <option value="carb">🌾 Углевод</option>                     <option value="veg">🥦 Овощ/фрукт</option>                     <option value="unknown">❓ Неизвестно</option>                 </select>                 <input id="custom-cals" placeholder="ккал" class="w-20 bg-transparent border border-white/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-500">
                                 <input type="number" id="custom-weight" placeholder="г" value="100" class="w-16 bg-transparent border border-white/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-500">
                                 <button onclick="addCustomComponent()" class="btn-ghost px-4 py-1.5">+</button>
                             </div>
@@ -765,7 +765,7 @@
             updateComponentsList();
         }
         
-        function addCustomComponent() {
+        function addCustomComponent() { const typeInput = document.getElementById('custom-type'); const type = typeInput ? typeInput.value : 'unknown';
             const nameInput = document.getElementById('custom-component');
             const calsInput = document.getElementById('custom-cals');
             const weightInput = document.getElementById('custom-weight');
@@ -773,10 +773,10 @@
             const cals = parseInt(calsInput.value);
             const weight = parseInt(weightInput.value) || 100;
             if (!name || !cals) return showToast('Введите название и калории', 'error');
-            addComponent(name, cals, '🍽️', weight);
+            addComponent(name, cals, '🍽️', weight, type);
             nameInput.value = '';
             calsInput.value = '';
-            weightInput.value = '100';
+            weightInput.value = '100';     if (typeInput) typeInput.value = 'protein';
         }
         
         function updateComponentWeight(name, weight) {
@@ -1959,8 +1959,8 @@
                     }
                 ];
         
-        function findBestRecipe(components) {
-                    const selectedTags = components.map(c => {
+        // ── INGREDIENT META ──────────────────────────────────────────── const INGREDIENT_META = {   'курица':   { role: 'protein', cookVerb: 'отварить кусочками',  cookMin: 15 },   'индейка':  { role: 'protein', cookVerb: 'отварить кусочками',  cookMin: 18 },   'говядина': { role: 'protein', cookVerb: 'отварить кусочками',  cookMin: 25 },   'печень':   { role: 'protein', cookVerb: 'отварить ломтиками',   cookMin: 10 },   'рыба':     { role: 'protein', cookVerb: 'отварить на пару',     cookMin: 12 },   'яйцо':     { role: 'protein', cookVerb: 'сварить вкрутую',      cookMin: 10 },   'творог':   { role: 'protein', cookVerb: 'добавить без нагрева', cookMin: 0  },   'рис':      { role: 'carb',    cookVerb: 'отварить до готовности', cookMin: 20 },   'гречка':   { role: 'carb',    cookVerb: 'отварить до готовности', cookMin: 20 },   'овсянка':  { role: 'carb',    cookVerb: 'сварить на воде',       cookMin: 10 },   'картофель':{ role: 'carb',    cookVerb: 'отварить кубиками',     cookMin: 20 },   'морковь':  { role: 'veg',     cookVerb: 'потушить ломтиками',    cookMin: 10 },   'тыква':    { role: 'veg',     cookVerb: 'потушить кубиками',     cookMin: 12 },   'кабачок':  { role: 'veg',     cookVerb: 'потушить кубиками',     cookMin: 8  },   'брокколи': { role: 'veg',     cookVerb: 'отварить соцветиями',   cookMin: 6  },   'яблоко':   { role: 'fruit',   cookVerb: 'натереть или запечь',   cookMin: 0  },   'груша':    { role: 'fruit',   cookVerb: 'натереть или запечь',   cookMin: 0  },   'зелень':   { role: 'extra',   cookVerb: 'добавить свежей',       cookMin: 0  }, };  // ── DOG RECIPE RULES ──────────────────────────────────────────── const DOG_RECIPE_RULES = {   requiresProtein: true,   noSalt: true,   noOil: true,   noFrying: true,   cookMethods: ['варка', 'тушение', 'пар'],   minIngredients: 2, };  // ── DETERMINISTIC RECIPE BUILDER ──────────────────────────────── function findBestRecipe(components) {
+                    // определяем мету каждого компонента     const resolved = components.map(c => {         const key = Object.keys(INGREDIENT_META).find(k => c.name.toLowerCase().includes(k));         return key             ? { ...c, ...INGREDIENT_META[key], key }             : { ...c, role: c.type === 'unknown' ? 'unknown' : 'known', cookVerb: null, cookMin: 0, key: null };     });      // валидация: требуется хотя бы один белок     const proteins = resolved.filter(c => c.role === 'protein');     if (DOG_RECIPE_RULES.requiresProtein && proteins.length === 0) {         return { _error: 'Без белкового компонента рецепт невозможен — добавьте мясо, рыбу, яйцо или творог.' };     }     const unknowns = resolved.filter(c => c.role === 'unknown');     if (unknowns.length > 0) {         return { _error: `Неизвестные ингредиенты: ${unknowns.map(u=>u.name).join(', ')}. Укажите тип при добавлении.` };     }      // строим название     const mainProtein = proteins[0];     const carbs = resolved.filter(c => c.role === 'carb');     const vegs = resolved.filter(c => ['veg','fruit','extra'].includes(c.role));     const carbPart = carbs.length ? ` с ${carbs[0].name.toLowerCase()}` : '';     const vegPart  = vegs.length  ? ` и ${vegs.map(v=>v.name.toLowerCase()).join(', ')}` : '';     const title = `${mainProtein.name}${carbPart}${vegPart} по-домашнему`;      // определяем время     const totalMin = Math.max(...resolved.filter(c=>c.cookMin>0).map(c=>c.cookMin)) + 5;     const timeLabel = `${totalMin} мин`;      // строим шаги детерминированно     const steps = [];     steps.push('Подготовить все ингредиенты: промыть, очистить, нарезать.');     resolved.filter(c=>c.cookMin>0 && c.role==='protein').forEach(c=>{         steps.push(`${c.name}: ${c.cookVerb} (${c.cookMin} мин)${DOG_RECIPE_RULES.noSalt ? ' — без соли' : ''}.`);     });     resolved.filter(c=>c.cookMin>0 && c.role==='carb').forEach(c=>{         steps.push(`${c.name}: ${c.cookVerb} (${c.cookMin} мин)${DOG_RECIPE_RULES.noOil ? ' — без масла' : ''}.`);     });     resolved.filter(c=>c.cookMin>0 && ['veg'].includes(c.role)).forEach(c=>{         steps.push(`${c.name}: ${c.cookVerb} (${c.cookMin} мин).`);     });     resolved.filter(c=>c.cookMin===0 && c.cookVerb).forEach(c=>{         steps.push(`${c.name}: ${c.cookVerb}.`);     });     steps.push('Смешать все ингредиенты в миске.');     steps.push('Остудить до +37°C перед подачей.');      // совет     const tips = `Без соли, сахара, масла и специй. Готовить только предложенными методами: ${DOG_RECIPE_RULES.cookMethods.join(', ')}.`;      // ингредиенты для отображения     const ingredients = resolved.map(c => ({ name: c.name, weight: c.weight }));      return {         name: title,         method: 'варка/тушение',         time: timeLabel,         tags: resolved.filter(c=>c.key).map(c=>c.key),         ingredients,         steps,         tips,         _built: true,     }; }  // end findBestRecipe
                         const name = c.name.toLowerCase();
                         if (name.includes('курица') || name.includes('индейка')) return 'мясо';
                         if (name.includes('говядина')) return 'говядина';
@@ -2019,7 +2019,7 @@
                 }
 
                 function generateRecipe() {
-                    if (selectedComponents.length < 2) {
+                    // Этап 1+2: валидация и детерминированный вывод     if (selectedComponents.length < DOG_RECIPE_RULES.minIngredients) {         showToast(`Выберите минимум ${DOG_RECIPE_RULES.minIngredients} компонента`, 'error');         return;     }     const recipe = findBestRecipe(selectedComponents);     if (recipe._error) {         showToast(recipe._error, 'error');         document.getElementById('recipe-result').innerHTML = `             <div class="flex gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/30">                 <i class="fas fa-exclamation-circle text-red-400 mt-0.5 flex-shrink-0"></i>                 <p class="text-sm text-red-300 leading-relaxed">${recipe._error}</p>             </div>`;         document.getElementById('recipe-result').classList.remove('hidden');         return;     }     if (selectedComponents.length < 2) {
                         showToast('Выберите минимум 2 компонента', 'error');
                         return;
                     }
