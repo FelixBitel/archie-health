@@ -900,7 +900,7 @@
         const panel = document.getElementById('generator-panel');
         const icon = document.getElementById('gen-toggle-icon');
         panel.classList.toggle('hidden');
-        icon.className = panel.classList.contains('hidden') ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+                icon.className = panel.classList.contains('hidden') ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
     }
 
     function addComponent(name, calsper100, emoji, defaultWeight) {
@@ -931,7 +931,7 @@
         const totalWeightEl = document.getElementById('total-weight');
         const normProgress = document.getElementById('norm-progress');
         const normPercent = document.getElementById('norm-percent');
-        const norm = state.settings.cals;
+        const norm = (state && state.settings && state.settings.cals) || 870;
 
         if (!selectedComponents.length) {
             list.innerHTML = '<span class="text-sm text-gray-400">Нажмите на компоненты...</span>';
@@ -967,17 +967,6 @@
         normProgress.style.width = pct + '%';
         normPercent.textContent = pct + '% от дневной нормы';
     }
-
-        function addComponent(name, calsper100, emoji, defaultWeight) {
-            const existing = selectedComponents.find(c => c.name === name);
-            if (existing) {
-                existing.weight += defaultWeight;
-            } else {
-                selectedComponents.push({ name, calsper100, emoji, weight: defaultWeight });
-            }
-            updateSelectedList();
-        }
-
             function changeWeight(i, delta) {
         selectedComponents[i].weight = Math.max(10, selectedComponents[i].weight + delta);
         updateSelectedList();
