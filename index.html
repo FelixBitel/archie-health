@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="ru">
+id="custom-cals"<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -405,12 +404,20 @@
                         <!-- Custom input -->
                         <div class="glass p-4 rounded-xl mb-4">
                             <p class="text-xs text-gray-500 mb-2">Свой компонент:</p>
-                            <div class="flex gap-2">
-                                <input type="text" id="custom-component" placeholder="Название" class="flex-1 bg-transparent border border-white/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-500">
-                                <input type="number" id="custom-type" class="bg-transparent border border-white/20 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-orange-500 text-gray-400">                     <option value="protein">🥩 Белок</option>                     <option value="carb">🌾 Углевод</option>                     <option value="veg">🥦 Овощ/фрукт</option>                     <option value="unknown">❓ Неизвестно</option>                 </select>                 <input id="custom-cals" placeholder="ккал" class="w-20 bg-transparent border border-white/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-500">
-                                <input type="number" id="custom-weight" placeholder="г" value="100" class="w-16 bg-transparent border border-white/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-500">
-                                <button onclick="addCustomComponent()" class="btn-ghost px-4 py-1.5">+</button>
-                            </div>
+                            <div class="flex gap-2 mb-2">
+                        <input type="text" id="custom-component" placeholder="Название" class="flex-1 bg-transparent border border-white/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-500">
+                        <input type="number" id="custom-cals" placeholder="ккал" class="w-16 bg-transparent border border-white/20 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-orange-500">
+                        <input type="number" id="custom-weight" placeholder="г" value="100" class="w-16 bg-transparent border border-white/20 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-orange-500">
+                    </div>
+                    <div class="flex gap-2 items-center">
+                        <select id="custom-type" class="flex-1 bg-gray-800 border border-white/20 rounded-lg px-2 py-1.5 text-xs text-gray-300 focus:outline-none focus:border-orange-500">
+                            <option value="protein">🥩 Белок (мясо, рыба, яйцо...)</option>
+                            <option value="carb">🌾 Углевод (крупа, картофель...)</option>
+                            <option value="veg">🥦 Овощ/фрукт</option>
+                            <option value="unknown">❓ Неизвестный тип</option>
+                        </select>
+                        <button onclick="addCustomComponent()" class="btn-ghost px-4 py-1.5 flex-shrink-0">+</button>
+                    </div>
                         </div>
                         
                         <!-- Selected with weights -->
