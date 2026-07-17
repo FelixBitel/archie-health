@@ -45,8 +45,9 @@ const IngredientDB = {
     { id: 'watermelon',      name: 'Арбуз',             emoji: '🍉', calsPer100g:  30, protein: 0.6,fat: 0.2, carbs: 7,   fiber: 0.4, category: 'fruit',   tags: ['фрукт', 'вода'],             safe: true, liverFriendly: true, seedsRemove: true },
 
     // ──── МАСЛА И ДОБАВКИ ────
+    // fix: salmon_oil category исправлен с 'supplement' на 'oil' — теперь попадает в генератор
     { id: 'olive_oil',       name: 'Оливковое масло',   emoji: '🫒', calsPer100g: 884, protein: 0,  fat: 100, carbs: 0,   fiber: 0,   category: 'oil',     tags: ['масло', 'омега9'],           safe: true, liverFriendly: true, maxPerMeal: 5 },
-    { id: 'salmon_oil',      name: 'Рыбий жир',         emoji: '💊', calsPer100g: 900, protein: 0,  fat: 100, carbs: 0,   fiber: 0,   category: 'supplement', tags: ['добавка', 'омега3'],         safe: true, liverFriendly: true, maxPerMeal: 3 },
+    { id: 'salmon_oil',      name: 'Рыбий жир',         emoji: '💊', calsPer100g: 900, protein: 0,  fat: 100, carbs: 0,   fiber: 0,   category: 'oil',     tags: ['добавка', 'омега3'],         safe: true, liverFriendly: true, maxPerMeal: 3 },
   ],
 
   /**

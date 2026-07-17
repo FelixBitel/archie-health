@@ -35,10 +35,11 @@ const MealGenerator = {
    * Построить один приём пищи
    */
   _buildMeal(targetCals, safeIngr, profile, mealType) {
-    const proteins = safeIngr.filter(i => i.category === 'protein');
+    // fix: dairy включён в белковые, supplement включён в масла, fruit — в овощи
+    const proteins = safeIngr.filter(i => ['protein', 'dairy'].includes(i.category));
     const grains   = safeIngr.filter(i => i.category === 'grain');
-    const veggies  = safeIngr.filter(i => i.category === 'veggie');
-    const oils     = safeIngr.filter(i => i.category === 'oil');
+    const veggies  = safeIngr.filter(i => ['veggie', 'fruit'].includes(i.category));
+    const oils     = safeIngr.filter(i => ['oil', 'supplement'].includes(i.category));
 
     // Пропорции калорийности: белок 55%, злаки 30%, овощи 10%, масло 5%
     const proteinCals = Math.round(targetCals * 0.55);
@@ -46,7 +47,7 @@ const MealGenerator = {
     const veggieCals  = Math.round(targetCals * 0.10);
     const oilCals     = Math.round(targetCals * 0.05);
 
-    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    const pick = (arr) => arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : null;
 
     const protein = pick(proteins);
     const grain   = pick(grains);
@@ -54,10 +55,21 @@ const MealGenerator = {
     const veggie2 = pick(veggies.filter(v => v.id !== veggie1?.id)) || veggie1;
     const oil     = pick(oils);
 
-    if (!protein || !grain) return { error: 'Недостаточно ингредиентов для генерации' };
+    if (!protein || !grain) {
+      console.warn('[MealGenerator] недостаточно ингредиентов:', {
+        proteins: proteins.length,
+        grains: grains.length,
+        mealType,
+      });
+      return {
+        mealType,
+        error: 'Недостаточно ингредиентов для генерации. Проверьте список аллергий и ограничений.',
+        details: { proteins: proteins.length, grains: grains.length },
+      };
+    }
 
     const portionG = (cals, ingredient) =>
-      Math.round((cals / ingredient.calsPer100g) * 100);
+      ingredient ? Math.round((cals / ingredient.calsPer100g) * 100) : 0;
 
     const ingredients = [
       { ingredient: protein, weightG: portionG(proteinCals, protein) },
