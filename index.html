@@ -1,11 +1,1044 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=client/index.html">
-<title>Арчибальд — мониторинг здоровья</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐕 Арчибальд — Премиум мониторинг здоровья</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: { 900: '#0a0a0f', 800: '#12121a', 700: '#1a1a25', 600: '#252535' },
+                        accent: { 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb' }
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #12121a 50%, #0f172a 100%);
+            min-height: 100vh;
+        }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #12121a; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 4px; }
+        
+        .glass {
+            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .glass-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(59,130,246,0.3);
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .glow-blue { box-shadow: 0 0 60px rgba(59,130,246,0.2); }
+        .glow-green { box-shadow: 0 0 60px rgba(34,197,94,0.2); }
+        .glow-orange { box-shadow: 0 0 60px rgba(251,146,60,0.2); }
+        .glow-purple { box-shadow: 0 0 60px rgba(168,85,247,0.2); }
+        
+        .bar { height: 8px; border-radius: 4px; transition: width 0.5s ease; }
+        .bar-energy { background: linear-gradient(90deg, #22c55e, #4ade80); }
+        .bar-appetite { background: linear-gradient(90deg, #f97316, #fb923c); }
+        .bar-mood { background: linear-gradient(90deg, #a855f7, #c084fc); }
+        .bar-activity { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        
+        .float { animation: float 6s ease-in-out infinite; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .pulse { animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .avatar-ring {
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6);
+            animation: spin 6s linear infinite;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .modal { opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+        .modal.active { opacity: 1; visibility: visible; }
+        .modal-content { transform: scale(0.95) translateY(20px); transition: all 0.3s ease; }
+        .modal.active .modal-content { transform: scale(1) translateY(0); }
+        
+        .toggle { width: 48px; height: 24px; border-radius: 12px; position: relative; cursor: pointer; transition: background 0.3s; background: #374151; }
+        .toggle::after { content: ''; position: absolute; width: 20px; height: 20px; border-radius: 50%; background: white; top: 2px; left: 2px; transition: transform 0.3s; }
+        .toggle.active { background: #22c55e; }
+        .toggle.active::after { transform: translateX(24px); }
+        
+        .toast {
+            position: fixed; bottom: 24px; right: 24px; padding: 16px 24px;
+            border-radius: 12px; color: white; font-weight: 500; z-index: 1000;
+            animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s forwards;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } }
+        @keyframes slideOut { to { transform: translateX(100%); opacity: 0; } }
+        
+        .btn-ghost {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 8px 16px;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        .btn-ghost:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+        }
+        
+        .card-link { transition: all 0.3s; }
+        .card-link:hover { transform: translateY(-4px); }
+
+        .med-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+    </style>
 </head>
-<body>
-<script>window.location.replace('client/index.html');</script>
+<body class="text-white overflow-x-hidden">
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50"></div>
+
+    <div class="fixed inset-0 pointer-events-none">
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/3 right-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-1/4 left-1/3 w-72 h-72 bg-pink-500/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="glass sticky top-0 z-40 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                    <i class="fas fa-dog text-white"></i>
+                </div>
+                <span id="nav-name" class="text-xl font-bold gradient-text">Арчибальд</span>
+            </div>
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#health" class="text-gray-400 hover:text-white transition">Здоровье</a>
+                <a href="#nutrition" class="text-gray-400 hover:text-white transition">Питание</a>
+                <a href="#medicine" class="text-gray-400 hover:text-white transition">Лекарства</a>
+                <a href="#tips" class="text-gray-400 hover:text-white transition">Советы</a>
+            </div>
+            <button onclick="openModal('settings-modal')" class="btn-ghost flex items-center gap-2">
+                <i class="fas fa-cog"></i>Настройки
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="relative pt-20 pb-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+                <div class="avatar-container float">
+                    <div class="avatar-ring"></div>
+                    <div class="relative">
+                        <img src="archie.jpg" alt="Арчибальд" class="w-40 h-40 rounded-full object-cover border-4 border-white/20">
+                    </div>
+                </div>
+                
+                <div class="text-center lg:text-left flex-1">
+                    <div class="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-4">
+                        <span class="w-2.5 h-2.5 bg-green-400 rounded-full pulse"></span>
+                        <span class="text-sm text-green-400">Активен сегодня</span>
+                    </div>
+                    
+                    <h1 class="text-5xl lg:text-6xl font-extrabold mb-2">
+                        <span id="hero-name" class="gradient-text">Арчибальд</span>
+                    </h1>
+                    <p class="text-xl text-gray-400 mb-6">Мишлинг, <span id="hero-age">12</span> лет, стабильное состояние</p>
+                    
+                    <div class="flex flex-wrap justify-center lg:justify-start gap-4">
+                        <div class="glass-card px-6 py-4 rounded-2xl text-center min-w-[100px]">
+                            <div id="hero-age-card" class="text-2xl font-bold gradient-text">12</div>
+                            <div class="text-xs text-gray-500">лет</div>
+                        </div>
+                        <div class="glass-card px-6 py-4 rounded-2xl text-center min-w-[100px]">
+                            <div id="hero-weight-card" class="text-2xl font-bold gradient-text">21.5</div>
+                            <div class="text-xs text-gray-500">кг</div>
+                        </div>
+                        <div class="glass-card px-6 py-4 rounded-2xl text-center min-w-[100px]">
+                            <div class="text-2xl font-bold text-green-400">✓</div>
+                            <div class="text-xs text-gray-500">стаби</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Health Section -->
+    <section id="health" class="py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl font-bold mb-2 gradient-text text-center">Мониторинг здоровья</h2>
+            <p class="text-gray-500 text-center mb-10">Обновлено сегодня</p>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 glass-card rounded-3xl p-6 glow-blue">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold flex items-center gap-2">
+                            <i class="fas fa-chart-line text-blue-400"></i>Динамика веса
+                        </h3>
+                        <button onclick="openModal('weight-modal')" class="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1 btn-ghost">
+                            <i class="fas fa-plus"></i>Записать
+                        </button>
+                    </div>
+                    
+                    <div id="weight-chart" class="h-48 flex items-end justify-between gap-2 px-4">
+                        <!-- rendered by renderWeightChart() -->
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-3xl p-6">
+                    <h3 class="text-lg font-semibold mb-6 flex items-center gap-2">
+                        <i class="fas fa-heart text-green-400"></i>Показатели
+                    </h3>
+                    
+                    <div class="space-y-5">
+                        <div>
+                            <div class="flex justify-between mb-2 text-sm">
+                                <span class="text-gray-400">Энергия</span>
+                                <span class="text-green-400">Высокая</span>
+                            </div>
+                            <div class="h-2 bg-gray-700/50 rounded-full"><div class="h-full bar bar-energy rounded-full" style="width: 85%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2 text-sm">
+                                <span class="text-gray-400">Аппетит</span>
+                                <span class="text-orange-400">Хороший</span>
+                            </div>
+                            <div class="h-2 bg-gray-700/50 rounded-full"><div class="h-full bar bar-appetite rounded-full" style="width: 88%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2 text-sm">
+                                <span class="text-gray-400">Настроение</span>
+                                <span class="text-purple-400">Стабильное</span>
+                            </div>
+                            <div class="h-2 bg-gray-700/50 rounded-full"><div class="h-full bar bar-mood rounded-full" style="width: 78%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2 text-sm">
+                                <span class="text-gray-400">Активность</span>
+                                <span class="text-blue-400">Умеренная</span>
+                            </div>
+                            <div class="h-2 bg-gray-700/50 rounded-full"><div class="h-full bar bar-activity rounded-full" style="width: 72%"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Nutrition Section -->
+    <section id="nutrition" class="py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl font-bold mb-2 gradient-text text-center">Питание</h2>
+            <p class="text-gray-500 text-center mb-10"><span id="nutrition-norm-label">~870 ккал</span> в день</p>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass-card rounded-3xl p-6 glow-orange">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold">Рацион сегодня</h3>
+                        <span class="text-sm text-gray-500">420 / <span id="norm-today">870</span> ккал</span>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="glass p-4 rounded-xl border-l-4 border-orange-500">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h4 class="font-semibold">Завтрак</h4>
+                                    <p class="text-xs text-gray-500">09:30</p>
+                                </div>
+                                <span class="bg-green-500/20 text-green-400 px-2 py-1 rounded-full text-xs">✓</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Курица 150г · Рис 100г · Морковь 50г</p>
+                            <div class="text-orange-400 font-medium mt-1">420 ккал</div>
+                        </div>
+                        
+                        <div class="glass p-4 rounded-xl border-l-4 border-gray-600 opacity-60">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h4 class="font-semibold">Ужин</h4>
+                                    <p class="text-xs text-gray-500">19:00</p>
+                                </div>
+                                <span class="bg-gray-500/20 text-gray-400 px-2 py-1 rounded-full text-xs">...</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Говядина 150г · Гречка 100г · Тыква 50г</p>
+                            <div class="text-gray-500 font-medium mt-1">450 ккал</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-5 h-2 bg-gray-700/50 rounded-full">
+                        <div class="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full" style="width: 48%"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">48% от нормы</p>
+                </div>
+                
+                <!-- Recipe Generator -->
+                <div class="glass-card rounded-3xl p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold flex items-center gap-2">
+                            <i class="fas fa-wand-magic-sparkles text-orange-400"></i>Генератор блюд
+                        </h3>
+                        <button onclick="toggleGenerator()" class="text-sm text-orange-400 hover:text-orange-300">
+                            <i class="fas fa-chevron-down" id="gen-toggle-icon"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="generator-panel">
+                        <div class="glass p-3 rounded-xl mb-4 flex justify-between items-center">
+                            <span class="text-sm text-gray-400">Дневная норма:</span>
+                            <span id="daily-norm" class="font-bold text-orange-400">870 ккал</span>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <p class="text-xs text-gray-500 mb-2">Белок (ккал/100г):</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="addComponent('Курица', 165, '🍗', 150)" class="btn-ghost text-xs">🍗 Курица (165)</button>
+                                <button onclick="addComponent('Говядина', 250, '🥩', 150)" class="btn-ghost text-xs">🥩 Говядина (250)</button>
+                                <button onclick="addComponent('Печень куриная', 119, '🫘', 80)" class="btn-ghost text-xs">🫘 Печень (119)</button>
+                                <button onclick="addComponent('Рыба белая', 90, '🐟', 120)" class="btn-ghost text-xs">🐟 Рыба (90)</button>
+                                <button onclick="addComponent('Творог 5%', 121, '🧀', 100)" class="btn-ghost text-xs">🧀 Творог (121)</button>
+                                <button onclick="addComponent('Яйцо', 155, '🥚', 50)" class="btn-ghost text-xs">🥚 Яйцо (155)</button>
+                                <button onclick="addComponent('Индейка', 135, '🦃', 150)" class="btn-ghost text-xs">🦃 Индейка (135)</button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <p class="text-xs text-gray-500 mb-2">Углеводы (ккал/100г):</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="addComponent('Рис', 130, '🍚', 100)" class="btn-ghost text-xs">🍚 Рис (130)</button>
+                                <button onclick="addComponent('Гречка', 110, '🌾', 100)" class="btn-ghost text-xs">🌾 Гречка (110)</button>
+                                <button onclick="addComponent('Овсянка', 68, '🥣', 80)" class="btn-ghost text-xs">🥣 Овсянка (68)</button>
+                                <button onclick="addComponent('Картофель', 76, '🥔', 100)" class="btn-ghost text-xs">🥔 Картофель (76)</button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <p class="text-xs text-gray-500 mb-2">Овощи/фрукты (ккал/100г):</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="addComponent('Морковь', 35, '🥕', 50)" class="btn-ghost text-xs">🥕 Морковь (35)</button>
+                                <button onclick="addComponent('Тыква', 26, '🎃', 80)" class="btn-ghost text-xs">🎃 Тыква (26)</button>
+                                <button onclick="addComponent('Кабачок', 24, '🥒', 70)" class="btn-ghost text-xs">🥒 Кабачок (24)</button>
+                                <button onclick="addComponent('Брокколи', 34, '🥦', 60)" class="btn-ghost text-xs">🥦 Брокколи (34)</button>
+                                <button onclick="addComponent('Яблоко', 52, '🍎', 100)" class="btn-ghost text-xs">🍎 Яблоко (52)</button>
+                                <button onclick="addComponent('Груша', 57, '🍐', 100)" class="btn-ghost text-xs">🍐 Груша (57)</button>
+                                <button onclick="addComponent('Зелень', 25, '🌿', 20)" class="btn-ghost text-xs">🌿 Зелень (25)</button>
+                            </div>
+                        </div>
+                        
+                        <div class="glass p-4 rounded-xl mb-4">
+                            <p class="text-xs text-gray-500 mb-2">Свой компонент (ккал/100г):</p>
+                            <div class="flex gap-2">
+                                <input type="text" id="custom-component" placeholder="Название" class="flex-1 bg-transparent border border-white/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-500">
+                                <input type="number" id="custom-cals" placeholder="ккал" class="w-20 bg-transparent border border-white/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-500">
+                                <input type="number" id="custom-weight" placeholder="г" value="100" class="w-16 bg-transparent border border-white/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-500">
+                                <button onclick="addCustomComponent()" class="btn-ghost px-4 py-1.5">+</button>
+                            </div>
+                        </div>
+                        
+                        <div class="glass p-4 rounded-xl mb-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-xs text-gray-500">Выбрано:</span>
+                                <button onclick="clearComponents()" class="text-xs text-gray-500 hover:text-white">Очистить</button>
+                            </div>
+                            <div id="selected-list" class="space-y-2">
+                                <span class="text-sm text-gray-400">Нажмите на компоненты...</span>
+                            </div>
+                        </div>
+                        
+                        <div class="glass p-4 rounded-xl mb-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="text-sm text-gray-400">Итого:</span>
+                                    <div id="total-cals" class="text-2xl font-bold text-orange-400">0 ккал</div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-sm text-gray-400">Вес:</span>
+                                    <div id="total-weight" class="text-lg font-bold text-gray-300">0 г</div>
+                                </div>
+                            </div>
+                            <div class="mt-3 h-2 bg-gray-700/50 rounded-full">
+                                <div id="norm-progress" class="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all" style="width: 0%"></div>
+                            </div>
+                            <p id="norm-percent" class="text-xs text-gray-500 mt-1">0% от дневной нормы</p>
+                        </div>
+                        
+                        <button onclick="generateRecipe()" class="w-full py-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl font-semibold hover:from-orange-600 hover:to-orange-700 transition flex items-center justify-center gap-2">
+                            <i class="fas fa-sparkles"></i>Сгенерировать рецепт
+                        </button>
+                        
+                        <div id="recipe-result" class="hidden mt-4"></div>
+                    </div>
+
+                    <!-- Saved Recipes -->
+                    <div id="saved-recipes-section" class="mt-6 hidden">
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="text-sm font-semibold text-gray-300">💾 Сохранённые рецепты</h4>
+                            <button onclick="clearRecipes()" class="text-xs text-gray-500 hover:text-red-400">Очистить все</button>
+                        </div>
+                        <div id="saved-recipes-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Medicine Section -->
+    <section id="medicine" class="py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-between items-center mb-10">
+                <div>
+                    <h2 class="text-3xl font-bold gradient-text">Медикаменты</h2>
+                    <p class="text-gray-500 mt-1">Активные назначения</p>
+                </div>
+                <button onclick="openModal('medicine-modal')" class="btn-ghost flex items-center gap-2">
+                    <i class="fas fa-plus text-green-400"></i>Добавить
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="medicine-list">
+                <!-- rendered by renderMedicines() -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Tips Section -->
+    <section id="tips" class="py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl font-bold gradient-text text-center mb-10">Рекомендации по уходу</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <a href="https://vetband.ru/articles/dieta-dlya-sobak-posle-operatsii" target="_blank" rel="noopener noreferrer" class="glass-card rounded-3xl p-6 block card-link">
+                    <div class="w-14 h-14 rounded-2xl bg-green-500/20 flex items-center justify-center mb-4">
+                        <i class="fas fa-utensils text-green-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">Диетическое питание</h3>
+                    <p class="text-sm text-gray-400 mb-3">Рекомендации по кормлению собак после операций и при заболеваниях ЖКТ</p>
+                    <span class="text-xs text-green-400 flex items-center gap-1">Подробнее <i class="fas fa-arrow-right"></i></span>
+                </a>
+                
+                <a href="https://www.royalcanin.com/ru/dogs/breeds/senior-dog" target="_blank" rel="noopener noreferrer" class="glass-card rounded-3xl p-6 block card-link">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-4">
+                        <i class="fas fa-heartbeat text-blue-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">Уход за пожилыми собаками</h3>
+                    <p class="text-sm text-gray-400 mb-3">Особенности содержания и питания собак старше 10 лет</p>
+                    <span class="text-xs text-blue-400 flex items-center gap-1">Подробнее <i class="fas fa-arrow-right"></i></span>
+                </a>
+                
+                <a href="https://vetmag.ru/diseases/diseases-sobak/artrit-u-sobak/" target="_blank" rel="noopener noreferrer" class="glass-card rounded-3xl p-6 block card-link">
+                    <div class="w-14 h-14 rounded-2xl bg-purple-500/20 flex items-center justify-center mb-4">
+                        <i class="fas fa-paw text-purple-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">Проблемы с суставами</h3>
+                    <p class="text-sm text-gray-400 mb-3">Профилактика и лечение артрита у собак крупных пород</p>
+                    <span class="text-xs text-purple-400 flex items-center gap-1">Подробнее <i class="fas fa-arrow-right"></i></span>
+                </a>
+                
+                <a href="https://www.proplan.ru/dog/article/pravilnoe-pitanie-sobaki/" target="_blank" rel="noopener noreferrer" class="glass-card rounded-3xl p-6 block card-link">
+                    <div class="w-14 h-14 rounded-2xl bg-orange-500/20 flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-simple text-orange-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">Контроль веса</h3>
+                    <p class="text-sm text-gray-400 mb-3">Как поддерживать оптимальный вес у собаки</p>
+                    <span class="text-xs text-orange-400 flex items-center gap-1">Подробнее <i class="fas fa-arrow-right"></i></span>
+                </a>
+                
+                <a href="https://zverivdom.com/article/kak-chasto-guliat-s-sobakoy" target="_blank" rel="noopener noreferrer" class="glass-card rounded-3xl p-6 block card-link">
+                    <div class="w-14 h-14 rounded-2xl bg-yellow-500/20 flex items-center justify-center mb-4">
+                        <i class="fas fa-walking text-yellow-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">Режим прогулок</h3>
+                    <p class="text-sm text-gray-400 mb-3">Оптимальная продолжительность и частота прогулок</p>
+                    <span class="text-xs text-yellow-400 flex items-center gap-1">Подробнее <i class="fas fa-arrow-right"></i></span>
+                </a>
+                
+                <a href="https://veterinar56.ru/statiya-o-psakh/chem-lechit-pochki-u-sobaki" target="_blank" rel="noopener noreferrer" class="glass-card rounded-3xl p-6 block card-link">
+                    <div class="w-14 h-14 rounded-2xl bg-red-500/20 flex items-center justify-center mb-4">
+                        <i class="fas fa-kidney text-red-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">Почечные заболевания</h3>
+                    <p class="text-sm text-gray-400 mb-3">Профилактика и раннее выявление проблем с почками</p>
+                    <span class="text-xs text-red-400 flex items-center gap-1">Подробнее <i class="fas fa-arrow-right"></i></span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-8 px-6 border-t border-white/10">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-dog text-white"></i>
+            </div>
+            <p class="text-gray-500 text-sm">© 2026 Арчибальд · Персонализированный мониторинг здоровья</p>
+        </div>
+    </footer>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="modal-content glass-card rounded-3xl p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold">⚙️ Настройки</h3>
+                <button onclick="closeModal('settings-modal')" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Норма калорий в день</label>
+                    <input type="number" id="setting-cals" value="870" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Имя питомца</label>
+                    <input type="text" id="setting-name" value="Арчибальд" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Возраст (лет)</label>
+                    <input type="number" id="setting-age" value="12" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Вес (кг)</label>
+                    <input type="number" step="0.1" id="setting-weight" value="21.5" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500">
+                </div>
+                <button onclick="saveSettings()" class="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition">
+                    Сохранить
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weight Modal -->
+    <div id="weight-modal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="modal-content glass-card rounded-3xl p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold">⚖️ Записать вес</h3>
+                <button onclick="closeModal('weight-modal')" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form onsubmit="saveWeight(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Вес (кг)</label>
+                    <input type="number" step="0.1" id="weight-value" required placeholder="21.5" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Дата</label>
+                    <input type="date" id="weight-date" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500">
+                </div>
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition">
+                    Сохранить
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Medicine Modal -->
+    <div id="medicine-modal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="modal-content glass-card rounded-3xl p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold">Добавить лекарство</h3>
+                <button onclick="closeModal('medicine-modal')" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form onsubmit="saveMedicine(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Название</label>
+                    <input type="text" id="med-name" required class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Тип / описание</label>
+                    <input type="text" id="med-type" placeholder="Противовоспалительное" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Дозировка</label>
+                    <input type="text" id="med-dosage" placeholder="1 таблетка" required class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Утро (время)</label>
+                        <input type="time" id="med-morning" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Вечер (время)</label>
+                        <input type="time" id="med-evening" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl font-semibold hover:from-purple-600 hover:to-purple-700 transition">
+                    Добавить
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    // ─── CONFIG ──────────────────────────────────────────────────────────────
+    const API_BASE = 'https://archie-health.onrender.com';
+
+    // ─── STATE ───────────────────────────────────────────────────────────────
+    let state = {
+        settings: { cals: 870, name: 'Арчибальд', age: 12, weight: 21.5 },
+        weightLog: [
+            { date: '15.11', value: 22.1 },
+            { date: '20.11', value: 21.8 },
+            { date: '25.11', value: 21.5 },
+            { date: '01.12', value: 21.3 },
+            { date: '07.12', value: 21.2 },
+            { date: 'Сег', value: 21.0, today: true }
+        ],
+        medicines: [
+            { name: 'Урзахол', type: 'Противовоспалительное', dosage: '1 таб.', morning: '09:00', evening: '21:00', icon: 'fa-capsules', color: 'purple' },
+            { name: 'Гепатосан', type: 'Гепатопротектор', dosage: '1 таб.', morning: '09:00', day: '18:00', icon: 'fa-pills', color: 'blue' }
+        ],
+        recipes: []
+    };
+
+    // ─── API HELPERS ─────────────────────────────────────────────────────────
+    async function apiGet(path) {
+        const res = await fetch(API_BASE + path);
+        if (!res.ok) throw new Error('GET ' + path + ' → ' + res.status);
+        return res.json();
+    }
+
+    async function apiPost(path, body) {
+        const res = await fetch(API_BASE + path, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error('POST ' + path + ' → ' + res.status);
+        return res.json();
+    }
+
+    async function apiDelete(path) {
+        const res = await fetch(API_BASE + path, { method: 'DELETE' });
+        if (!res.ok) throw new Error('DELETE ' + path + ' → ' + res.status);
+        return res.json();
+    }
+
+    // ─── INIT ─────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            const loaded = await apiGet('/api/state');
+            if (loaded) {
+                state = Object.assign(state, loaded);
+            }
+        } catch(e) {
+            console.warn('Не удалось загрузить состояние с API, используются defaults:', e);
+        }
+        applySettings();
+        renderWeightChart();
+        renderMedicines();
+        renderSavedRecipes();
+
+        const wd = document.getElementById('weight-date');
+        if (wd) wd.valueAsDate = new Date();
+    });
+
+    // ─── SETTINGS ────────────────────────────────────────────────────────────
+    async function saveSettings() {
+        state.settings = {
+            cals: parseInt(document.getElementById('setting-cals').value) || 870,
+            name: document.getElementById('setting-name').value || 'Арчибальд',
+            age: parseInt(document.getElementById('setting-age').value) || 12,
+            weight: parseFloat(document.getElementById('setting-weight').value) || 21.5
+        };
+        try {
+            await apiPost('/api/settings', state.settings);
+        } catch(e) {
+            console.error('Ошибка сохранения настроек:', e);
+        }
+        applySettings();
+        closeModal('settings-modal');
+        showToast('✅ Настройки сохранены!', '#22c55e');
+    }
+
+    function applySettings() {
+        const s = state.settings;
+        document.getElementById('nav-name').textContent = s.name;
+        document.getElementById('hero-name').textContent = s.name;
+        document.getElementById('hero-age').textContent = s.age;
+        document.getElementById('hero-age-card').textContent = s.age;
+        document.getElementById('hero-weight-card').textContent = s.weight;
+        document.getElementById('daily-norm').textContent = s.cals + ' ккал';
+        document.getElementById('norm-today').textContent = s.cals;
+        document.getElementById('nutrition-norm-label').textContent = '~' + s.cals + ' ккал';
+
+        document.getElementById('setting-cals').value = s.cals;
+        document.getElementById('setting-name').value = s.name;
+        document.getElementById('setting-age').value = s.age;
+        document.getElementById('setting-weight').value = s.weight;
+    }
+
+    // ─── WEIGHT ──────────────────────────────────────────────────────────────
+    async function saveWeight(e) {
+        e.preventDefault();
+        const val = parseFloat(document.getElementById('weight-value').value);
+        const dateRaw = document.getElementById('weight-date').value;
+        if (!val) return;
+        const d = dateRaw ? new Date(dateRaw) : new Date();
+        const label = d.getDate() + '.' + String(d.getMonth()+1).padStart(2,'0');
+        const entry = { date: label, value: val, today: true };
+        try {
+            const updated = await apiPost('/api/weight', entry);
+            if (updated && updated.weightLog) {
+                state.weightLog = updated.weightLog;
+            } else {
+                state.weightLog = state.weightLog.map(w => ({ ...w, today: false }));
+                state.weightLog.push(entry);
+                if (state.weightLog.length > 8) state.weightLog = state.weightLog.slice(-8);
+            }
+        } catch(e) {
+            console.error('Ошибка записи веса:', e);
+            state.weightLog = state.weightLog.map(w => ({ ...w, today: false }));
+            state.weightLog.push(entry);
+            if (state.weightLog.length > 8) state.weightLog = state.weightLog.slice(-8);
+        }
+        renderWeightChart();
+        closeModal('weight-modal');
+        showToast('⚖️ Вес записан: ' + val + ' кг', '#3b82f6');
+        document.getElementById('weight-value').value = '';
+    }
+
+    function renderWeightChart() {
+        const container = document.getElementById('weight-chart');
+        if (!container) return;
+        const log = state.weightLog;
+        if (!log.length) { container.innerHTML = '<p class="text-gray-500 text-sm">Нет данных</p>'; return; }
+        const max = Math.max(...log.map(w => w.value));
+        const min = Math.min(...log.map(w => w.value));
+        const range = max - min || 1;
+        const maxBarH = 160;
+        const minBarH = 20;
+
+        container.innerHTML = log.map(w => {
+            const h = minBarH + ((w.value - min) / range) * (maxBarH - minBarH);
+            const isToday = w.today;
+            const barClass = isToday ? 'bar-energy' : 'bar-activity';
+            const labelClass = isToday ? 'text-green-400 font-bold' : 'text-gray-500';
+            const valClass = isToday ? 'text-green-400' : '';
+            return `<div class="flex-1 flex flex-col items-center">
+                <div class="w-full rounded-t-lg bar ${barClass}" style="height:${h}px"></div>
+                <p class="mt-2 text-xs ${labelClass}">${w.date}</p>
+                <p class="text-xs ${valClass}">${w.value} кг</p>
+            </div>`;
+        }).join('');
+    }
+
+    // ─── MEDICINE ────────────────────────────────────────────────────────────
+    const MED_COLORS = ['purple','blue','green','orange','pink','yellow'];
+    const MED_ICONS = ['fa-capsules','fa-pills','fa-syringe','fa-tablets'];
+
+    async function saveMedicine(e) {
+        e.preventDefault();
+        const med = {
+            name: document.getElementById('med-name').value,
+            type: document.getElementById('med-type').value || '',
+            dosage: document.getElementById('med-dosage').value,
+            morning: document.getElementById('med-morning').value,
+            evening: document.getElementById('med-evening').value,
+            icon: MED_ICONS[state.medicines.length % MED_ICONS.length],
+            color: MED_COLORS[state.medicines.length % MED_COLORS.length]
+        };
+        try {
+            const updated = await apiPost('/api/medicine', med);
+            if (updated && updated.medicines) {
+                state.medicines = updated.medicines;
+            } else {
+                state.medicines.push(med);
+            }
+        } catch(err) {
+            console.error('Ошибка добавления лекарства:', err);
+            state.medicines.push(med);
+        }
+        renderMedicines();
+        closeModal('medicine-modal');
+        showToast('💊 ' + med.name + ' добавлен', '#a855f7');
+        e.target.reset();
+    }
+
+    async function deleteMedicine(idx) {
+        try {
+            const updated = await apiDelete('/api/medicine/' + idx);
+            if (updated && updated.medicines) {
+                state.medicines = updated.medicines;
+            } else {
+                state.medicines.splice(idx, 1);
+            }
+        } catch(e) {
+            console.error('Ошибка удаления лекарства:', e);
+            state.medicines.splice(idx, 1);
+        }
+        renderMedicines();
+        showToast('🗑 Лекарство удалено', '#6b7280');
+    }
+
+    function renderMedicines() {
+        const list = document.getElementById('medicine-list');
+        if (!list) return;
+        if (!state.medicines.length) {
+            list.innerHTML = '<p class="text-gray-500 col-span-2 text-center py-8">Нет активных лекарств. Нажмите «Добавить».</p>';
+            return;
+        }
+        list.innerHTML = state.medicines.map((med, i) => {
+            const times = [];
+            if (med.morning) times.push(`<div class="flex justify-between items-center glass p-3 rounded-xl"><div class="flex items-center gap-3"><i class="fas fa-sun text-yellow-400"></i><span>Утро</span></div><span class="font-semibold">${med.morning}</span></div>`);
+            if (med.day) times.push(`<div class="flex justify-between items-center glass p-3 rounded-xl"><div class="flex items-center gap-3"><i class="fas fa-cloud-sun text-orange-400"></i><span>День</span></div><span class="font-semibold">${med.day}</span></div>`);
+            if (med.evening) times.push(`<div class="flex justify-between items-center glass p-3 rounded-xl opacity-80"><div class="flex items-center gap-3"><i class="fas fa-moon text-blue-400"></i><span>Вечер</span></div><span class="font-semibold">${med.evening}</span></div>`);
+            return `<div class="med-card glow-${med.color}">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-${med.color}-500/20 flex items-center justify-center">
+                            <i class="fas ${med.icon} text-${med.color}-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold">${med.name}</h3>
+                            <p class="text-sm text-gray-500">${med.type}${med.dosage ? ' · ' + med.dosage : ''}</p>
+                        </div>
+                    </div>
+                    <button onclick="deleteMedicine(${i})" class="text-gray-500 hover:text-red-400 transition" title="Удалить">
+                        <i class="fas fa-trash text-sm"></i>
+                    </button>
+                </div>
+                <div class="space-y-2">${times.join('') || '<p class="text-xs text-gray-500">Время не указано</p>'}</div>
+            </div>`;
+        }).join('');
+    }
+
+    // ─── RECIPES ─────────────────────────────────────────────────────────────
+    async function saveRecipe(text) {
+        const recipe = { text, date: new Date().toLocaleDateString('ru') };
+        try {
+            const updated = await apiPost('/api/recipe', recipe);
+            if (updated && updated.recipes) {
+                state.recipes = updated.recipes;
+            } else {
+                state.recipes.unshift(recipe);
+                if (state.recipes.length > 10) state.recipes = state.recipes.slice(0, 10);
+            }
+        } catch(e) {
+            console.error('Ошибка сохранения рецепта:', e);
+            state.recipes.unshift(recipe);
+            if (state.recipes.length > 10) state.recipes = state.recipes.slice(0, 10);
+        }
+        renderSavedRecipes();
+    }
+
+    function clearRecipes() {
+        state.recipes = [];
+        renderSavedRecipes();
+    }
+
+    function renderSavedRecipes() {
+        const section = document.getElementById('saved-recipes-section');
+        const list = document.getElementById('saved-recipes-list');
+        if (!section || !list) return;
+        if (!state.recipes.length) { section.classList.add('hidden'); return; }
+        section.classList.remove('hidden');
+        list.innerHTML = state.recipes.map((r, i) =>
+            `<div class="glass p-3 rounded-xl text-sm">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-xs text-gray-500">${r.date}</span>
+                    <button onclick="deleteRecipe(${i})" class="text-gray-600 hover:text-red-400 text-xs">✕</button>
+                </div>
+                <p class="text-gray-300 text-xs leading-relaxed">${r.text.slice(0, 120)}${r.text.length > 120 ? '…' : ''}</p>
+            </div>`
+        ).join('');
+    }
+
+    function deleteRecipe(i) {
+        state.recipes.splice(i, 1);
+        renderSavedRecipes();
+    }
+
+    // ─── GENERATOR ───────────────────────────────────────────────────────────
+    let selectedComponents = [];
+
+    function toggleGenerator() {
+        const panel = document.getElementById('generator-panel');
+        const icon = document.getElementById('gen-toggle-icon');
+        panel.classList.toggle('hidden');
+        icon.className = panel.classList.contains('hidden') ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+    }
+
+    function addComponent(name, calsper100, emoji, defaultWeight) {
+        const existing = selectedComponents.find(c => c.name === name);
+        if (existing) { existing.weight += defaultWeight; }
+        else { selectedComponents.push({ name, calsper100, emoji, weight: defaultWeight }); }
+        updateSelectedList();
+    }
+
+    function addCustomComponent() {
+        const name = document.getElementById('custom-component').value.trim();
+        const cals = parseFloat(document.getElementById('custom-cals').value);
+        const weight = parseFloat(document.getElementById('custom-weight').value) || 100;
+        if (!name || !cals) { showToast('Заполните название и калории', '#ef4444'); return; }
+        addComponent(name, cals, '🍽', weight);
+        document.getElementById('custom-component').value = '';
+        document.getElementById('custom-cals').value = '';
+    }
+
+    function clearComponents() {
+        selectedComponents = [];
+        updateSelectedList();
+    }
+
+    function updateSelectedList() {
+        const list = document.getElementById('selected-list');
+        const totalCalsEl = document.getElementById('total-cals');
+        const totalWeightEl = document.getElementById('total-weight');
+        const normProgress = document.getElementById('norm-progress');
+        const normPercent = document.getElementById('norm-percent');
+        const norm = state.settings.cals;
+
+        if (!selectedComponents.length) {
+            list.innerHTML = '<span class="text-sm text-gray-400">Нажмите на компоненты...</span>';
+            totalCalsEl.textContent = '0 ккал';
+            totalWeightEl.textContent = '0 г';
+            normProgress.style.width = '0%';
+            normPercent.textContent = '0% от дневной нормы';
+            return;
+        }
+
+        let totalCals = 0, totalW = 0;
+        list.innerHTML = selectedComponents.map((c, i) => {
+            const cal = Math.round(c.calsper100 * c.weight / 100);
+            totalCals += cal; totalW += c.weight;
+            return `<div class="flex items-center justify-between gap-2">
+                <span class="text-sm">${c.emoji} ${c.name}</span>
+                <div class="flex items-center gap-2">
+                    <button onclick="changeWeight(${i},-10)" class="text-gray-400 hover:text-white text-xs px-1">−</button>
+                    <input type="number" value="${c.weight}" min="10" max="500" step="10"
+                        onchange="selectedComponents[${i}].weight=parseInt(this.value)||50; updateSelectedList();"
+                        class="w-16 bg-transparent border border-white/20 rounded px-2 py-0.5 text-xs text-center focus:outline-none">
+                    <span class="text-xs text-gray-500">г</span>
+                    <button onclick="changeWeight(${i},10)" class="text-gray-400 hover:text-white text-xs px-1">+</button>
+                    <span class="text-xs text-orange-400 w-14 text-right">${cal} ккал</span>
+                    <button onclick="selectedComponents.splice(${i},1); updateSelectedList();" class="text-gray-600 hover:text-red-400 text-xs ml-1">✕</button>
+                </div>
+            </div>`;
+        }).join('');
+
+        totalCalsEl.textContent = totalCals + ' ккал';
+        totalWeightEl.textContent = totalW + ' г';
+        const pct = Math.min(Math.round(totalCals / norm * 100), 100);
+        normProgress.style.width = pct + '%';
+        normPercent.textContent = pct + '% от дневной нормы';
+    }
+
+    function changeWeight(i, delta) {
+        selectedComponents[i].weight = Math.max(10, selectedComponents[i].weight + delta);
+        updateSelectedList();
+    }
+
+    const recipes25 = [
+        "Отварить курицу и рис раздельно. Смешать с тёртой морковью. Подавать тёплым.",
+        "Говядину отварить, измельчить. Добавить отварную гречку и тушёную тыкву. Перемешать.",
+        "Печень куриную отварить 15 мин. Смешать с варёным картофелем и зеленью.",
+        "Рыбу (без костей) отварить. Смешать с отварным рисом и натёртым кабачком.",
+        "Индейку отварить, нарезать. Добавить отварную овсянку и брокколи. Перемешать.",
+        "Творог смешать с тёртым яблоком и грушей. Подавать как отдельный приём пищи.",
+        "Яйцо сварить вкрутую, нарезать. Смешать с отварной гречкой и морковью.",
+        "Говядину нарезать кусочками, тушить 20 мин с кабачком. Добавить варёный рис.",
+        "Курицу измельчить в фарш, отварить. Смешать с тыквой и зеленью.",
+        "Рыбу отварить, разобрать. Перемешать с картофельным пюре без масла.",
+        "Индейку с овсянкой отварить вместе. Добавить тёртую морковь перед подачей.",
+        "Печень говяжью отварить, измельчить. Смешать с рисом и брокколи.",
+        "Творог смешать с варёной гречкой. Добавить мелко нарезанную зелень.",
+        "Курицу и картофель отварить. Перемешать с тушёным кабачком.",
+        "Яйцо взбить и запечь омлет без масла. Подавать с тёртой морковью.",
+        "Говяжий фарш отварить, раскрошить. Смешать с отварным рисом и тыквой.",
+        "Рыбу запечь в фольге 20 мин. Смешать с отварной гречкой и зеленью.",
+        "Индейку отварить с брокколи. Добавить немного творога для белка.",
+        "Куриную грудку нарезать тонко, отварить. Подавать с яблоком и овсянкой.",
+        "Печень куриную обварить кипятком, измельчить. Смешать с картофелем и кабачком.",
+        "Говядину нарезать, отварить 30 мин. Добавить гречку и груши без косточек.",
+        "Творог перемешать с тёртым кабачком и зеленью. Подавать охлаждённым.",
+        "Рыбу белую отварить с морковью. Перемешать и подавать с рисом.",
+        "Индейку с тыквой тушить 25 мин. Добавить отварную овсянку.",
+        "Яйцо отварить, нарезать. Смешать с гречкой, морковью и зеленью."
+    ];
+
+    function generateRecipe() {
+        if (!selectedComponents.length) { showToast('Выберите компоненты', '#f97316'); return; }
+        const names = selectedComponents.map(c => `${c.emoji} ${c.name} (${c.weight}г)`).join(', ');
+        const totalCals = selectedComponents.reduce((s,c) => s + Math.round(c.calsper100*c.weight/100), 0);
+        const baseRecipe = recipes25[Math.floor(Math.random() * recipes25.length)];
+        const text = `Состав: ${names}.\n\n${baseRecipe}\n\n🔥 Итого: ${totalCals} ккал`;
+
+        const result = document.getElementById('recipe-result');
+        result.classList.remove('hidden');
+        result.innerHTML = `<div class="glass p-4 rounded-xl">
+            <div class="flex justify-between items-center mb-2">
+                <p class="text-sm font-semibold text-orange-400">Рецепт готов!</p>
+                <button onclick="saveRecipe(this.closest('.glass').querySelector('pre').textContent)" class="text-xs btn-ghost text-green-400">💾 Сохранить</button>
+            </div>
+            <pre class="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">${text}</pre>
+        </div>`;
+
+        showToast('🍽 Рецепт сгенерирован!', '#f97316');
+    }
+
+    // ─── MODAL ────────────────────────────────────────────────────────────────
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    // ─── TOAST ───────────────────────────────────────────────────────────────
+    function showToast(msg, color = '#3b82f6') {
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.style.background = color;
+        t.textContent = msg;
+        document.getElementById('toast-container').appendChild(t);
+        setTimeout(() => t.remove(), 3200);
+    }
+
+    // ─── REMINDER (UI only) ──────────────────────────────────────────────────
+    function toggleReminder(el) { el.classList.toggle('active'); }
+    function saveReminder(idx) { showToast('🔔 Напоминание сохранено', '#8b5cf6'); }
+    function editMedicine(idx) { showToast('Редактирование — скоро', '#6b7280'); }
+    </script>
 </body>
 </html>
