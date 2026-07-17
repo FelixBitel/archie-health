@@ -614,6 +614,9 @@
     </div>
 
     <script>
+    // ─── CONFIG ──────────────────────────────────────────────────────────────
+    const API_BASE = 'https://archie-health.onrender.com';
+
     // ─── STATE ───────────────────────────────────────────────────────────────
     let state = {
         settings: { cals: 870, name: 'Арчибальд', age: 12, weight: 21.5 },
@@ -632,42 +635,61 @@
         recipes: []
     };
 
-    // ─── PERSIST ─────────────────────────────────────────────────────────────
-    function save() {
-        try { localStorage.setItem('archie_state', JSON.stringify(state)); } catch(e) {}
+    // ─── API HELPERS ─────────────────────────────────────────────────────────
+    async function apiGet(path) {
+        const res = await fetch(API_BASE + path);
+        if (!res.ok) throw new Error('GET ' + path + ' → ' + res.status);
+        return res.json();
     }
-    function load() {
-        try {
-            const raw = localStorage.getItem('archie_state');
-            if (raw) {
-                const loaded = JSON.parse(raw);
-                state = Object.assign(state, loaded);
-            }
-        } catch(e) {}
+
+    async function apiPost(path, body) {
+        const res = await fetch(API_BASE + path, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error('POST ' + path + ' → ' + res.status);
+        return res.json();
+    }
+
+    async function apiDelete(path) {
+        const res = await fetch(API_BASE + path, { method: 'DELETE' });
+        if (!res.ok) throw new Error('DELETE ' + path + ' → ' + res.status);
+        return res.json();
     }
 
     // ─── INIT ─────────────────────────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', function() {
-        load();
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            const loaded = await apiGet('/api/state');
+            if (loaded) {
+                state = Object.assign(state, loaded);
+            }
+        } catch(e) {
+            console.warn('Не удалось загрузить состояние с API, используются defaults:', e);
+        }
         applySettings();
         renderWeightChart();
         renderMedicines();
         renderSavedRecipes();
 
-        // Set today's date default in weight modal
         const wd = document.getElementById('weight-date');
         if (wd) wd.valueAsDate = new Date();
     });
 
     // ─── SETTINGS ────────────────────────────────────────────────────────────
-    function saveSettings() {
+    async function saveSettings() {
         state.settings = {
             cals: parseInt(document.getElementById('setting-cals').value) || 870,
             name: document.getElementById('setting-name').value || 'Арчибальд',
             age: parseInt(document.getElementById('setting-age').value) || 12,
             weight: parseFloat(document.getElementById('setting-weight').value) || 21.5
         };
-        save();
+        try {
+            await apiPost('/api/settings', state.settings);
+        } catch(e) {
+            console.error('Ошибка сохранения настроек:', e);
+        }
         applySettings();
         closeModal('settings-modal');
         showToast('✅ Настройки сохранены!', '#22c55e');
@@ -684,7 +706,6 @@
         document.getElementById('norm-today').textContent = s.cals;
         document.getElementById('nutrition-norm-label').textContent = '~' + s.cals + ' ккал';
 
-        // Sync modal fields
         document.getElementById('setting-cals').value = s.cals;
         document.getElementById('setting-name').value = s.name;
         document.getElementById('setting-age').value = s.age;
@@ -692,19 +713,29 @@
     }
 
     // ─── WEIGHT ──────────────────────────────────────────────────────────────
-    function saveWeight(e) {
+    async function saveWeight(e) {
         e.preventDefault();
         const val = parseFloat(document.getElementById('weight-value').value);
         const dateRaw = document.getElementById('weight-date').value;
         if (!val) return;
         const d = dateRaw ? new Date(dateRaw) : new Date();
         const label = d.getDate() + '.' + String(d.getMonth()+1).padStart(2,'0');
-        // Remove old "today" flag
-        state.weightLog = state.weightLog.map(w => ({ ...w, today: false }));
-        state.weightLog.push({ date: label, value: val, today: true });
-        // Keep last 8
-        if (state.weightLog.length > 8) state.weightLog = state.weightLog.slice(-8);
-        save();
+        const entry = { date: label, value: val, today: true };
+        try {
+            const updated = await apiPost('/api/weight', entry);
+            if (updated && updated.weightLog) {
+                state.weightLog = updated.weightLog;
+            } else {
+                state.weightLog = state.weightLog.map(w => ({ ...w, today: false }));
+                state.weightLog.push(entry);
+                if (state.weightLog.length > 8) state.weightLog = state.weightLog.slice(-8);
+            }
+        } catch(e) {
+            console.error('Ошибка записи веса:', e);
+            state.weightLog = state.weightLog.map(w => ({ ...w, today: false }));
+            state.weightLog.push(entry);
+            if (state.weightLog.length > 8) state.weightLog = state.weightLog.slice(-8);
+        }
         renderWeightChart();
         closeModal('weight-modal');
         showToast('⚖️ Вес записан: ' + val + ' кг', '#3b82f6');
@@ -719,7 +750,7 @@
         const max = Math.max(...log.map(w => w.value));
         const min = Math.min(...log.map(w => w.value));
         const range = max - min || 1;
-        const maxBarH = 160; // px
+        const maxBarH = 160;
         const minBarH = 20;
 
         container.innerHTML = log.map(w => {
@@ -740,7 +771,7 @@
     const MED_COLORS = ['purple','blue','green','orange','pink','yellow'];
     const MED_ICONS = ['fa-capsules','fa-pills','fa-syringe','fa-tablets'];
 
-    function saveMedicine(e) {
+    async function saveMedicine(e) {
         e.preventDefault();
         const med = {
             name: document.getElementById('med-name').value,
@@ -751,17 +782,35 @@
             icon: MED_ICONS[state.medicines.length % MED_ICONS.length],
             color: MED_COLORS[state.medicines.length % MED_COLORS.length]
         };
-        state.medicines.push(med);
-        save();
+        try {
+            const updated = await apiPost('/api/medicine', med);
+            if (updated && updated.medicines) {
+                state.medicines = updated.medicines;
+            } else {
+                state.medicines.push(med);
+            }
+        } catch(err) {
+            console.error('Ошибка добавления лекарства:', err);
+            state.medicines.push(med);
+        }
         renderMedicines();
         closeModal('medicine-modal');
         showToast('💊 ' + med.name + ' добавлен', '#a855f7');
         e.target.reset();
     }
 
-    function deleteMedicine(idx) {
-        state.medicines.splice(idx, 1);
-        save();
+    async function deleteMedicine(idx) {
+        try {
+            const updated = await apiDelete('/api/medicine/' + idx);
+            if (updated && updated.medicines) {
+                state.medicines = updated.medicines;
+            } else {
+                state.medicines.splice(idx, 1);
+            }
+        } catch(e) {
+            console.error('Ошибка удаления лекарства:', e);
+            state.medicines.splice(idx, 1);
+        }
         renderMedicines();
         showToast('🗑 Лекарство удалено', '#6b7280');
     }
@@ -799,17 +848,26 @@
     }
 
     // ─── RECIPES ─────────────────────────────────────────────────────────────
-    function saveRecipe(text) {
+    async function saveRecipe(text) {
         const recipe = { text, date: new Date().toLocaleDateString('ru') };
-        state.recipes.unshift(recipe);
-        if (state.recipes.length > 10) state.recipes = state.recipes.slice(0, 10);
-        save();
+        try {
+            const updated = await apiPost('/api/recipe', recipe);
+            if (updated && updated.recipes) {
+                state.recipes = updated.recipes;
+            } else {
+                state.recipes.unshift(recipe);
+                if (state.recipes.length > 10) state.recipes = state.recipes.slice(0, 10);
+            }
+        } catch(e) {
+            console.error('Ошибка сохранения рецепта:', e);
+            state.recipes.unshift(recipe);
+            if (state.recipes.length > 10) state.recipes = state.recipes.slice(0, 10);
+        }
         renderSavedRecipes();
     }
 
     function clearRecipes() {
         state.recipes = [];
-        save();
         renderSavedRecipes();
     }
 
@@ -832,7 +890,6 @@
 
     function deleteRecipe(i) {
         state.recipes.splice(i, 1);
-        save();
         renderSavedRecipes();
     }
 
