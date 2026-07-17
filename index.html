@@ -1005,7 +1005,7 @@
         if (!selectedComponents.length) { showToast('Выберите компоненты', '#f97316'); return; }
         const names = selectedComponents.map(c => `${c.emoji} ${c.name} (${c.weight}г)`).join(', ');
         const totalCals = selectedComponents.reduce((s,c) => s + Math.round(c.calsper100*c.weight/100), 0);
-        const baseRecipe = recipes25[Math.floor(Math.random() * recipes25.length)];
+        const proteinComp = selectedComponents.find(c => ['Курица','Говядина','Печень','Рыба','Индейка','Яйцо','Творог'].includes(c.name)); const carbComp = selectedComponents.find(c => ['Рис','Гречка','Овсянка','Картофель'].includes(c.name)); const vegComp = selectedComponents.find(c => ['Морковь','Тыква','Кабачок','Брокколи','Яблоко','Груша','Зелень'].includes(c.name)); const cookMethod = proteinComp ? (['Рыба','Творог','Яйцо'].includes(proteinComp.name) ? 'отварить' : 'отварить до готовности') : ''; const parts = []; if (proteinComp) parts.push(`${proteinComp.name} (${proteinComp.weight}г) ${cookMethod}`); if (carbComp) parts.push(`${carbComp.name} (${carbComp.weight}г) отварить отдельно`); if (vegComp) parts.push(`${vegComp.name} (${vegComp.weight}г) добавить в конце`); const otherComp = selectedComponents.filter(c => !([proteinComp,carbComp,vegComp].filter(Boolean).includes(c))); otherComp.forEach(c => parts.push(`${c.name} (${c.weight}г) добавить по вкусу`)); const baseRecipe = parts.join('. ') + '. Смешать и подавать тёплым.';
         const text = `Состав: ${names}.\n\n${baseRecipe}\n\n🔥 Итого: ${totalCals} ккал`;
 
         const result = document.getElementById('recipe-result');
