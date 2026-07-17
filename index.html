@@ -904,7 +904,7 @@
     }
 
     function addComponent(name, calsper100, emoji, defaultWeight) {
-        const existing = selectedComponents.find(c => c.name === name);
+        document.title='DBG:'+name;         const existing = selectedComponents.find(c => c.name === name);
         if (existing) { existing.weight += defaultWeight; }
         else { selectedComponents.push({ name, calsper100, emoji, weight: defaultWeight }); }
         updateSelectedList();
