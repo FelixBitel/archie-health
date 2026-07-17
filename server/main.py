@@ -13,7 +13,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DATA_FILE = "data.json"
+DATA_FILE = "/tmp/data.json"
 
 DEFAULT_STATE = {
     "settings": {"cals": 870, "name": "Archibald", "age": 12, "weight": 21.5},
