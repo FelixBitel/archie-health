@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <!-- v2025-07-17-fix-generator -->
+    <!-- v2026-07-18-fix-generator -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🐕 Арчибальд — Премиум мониторинг здоровья</title>
@@ -331,6 +331,12 @@
                             <span class="text-sm text-gray-400">Дневная норма:</span>
                             <span id="daily-norm" class="font-bold text-orange-400">870 ккал</span>
                         </div>
+
+                        <!-- Auto-generate button -->
+                        <button onclick="generateDayAuto()" class="w-full mb-4 py-3 bg-gradient-to-r from-green-500 to-teal-600 rounded-xl font-semibold hover:from-green-600 hover:to-teal-700 transition flex items-center justify-center gap-2">
+                            <i class="fas fa-robot"></i>Авторацион на день (с учётом профиля)
+                        </button>
+                        <div id="auto-result" class="hidden mb-4"></div>
                         
                         <div class="mb-4">
                             <p class="text-xs text-gray-500 mb-2">Белок (ккал/100г):</p>
@@ -542,6 +548,32 @@
                     <label class="block text-sm text-gray-400 mb-1">Вес (кг)</label>
                     <input type="number" step="0.1" id="setting-weight" value="21.5" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500">
                 </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Активность</label>
+                    <select id="setting-activity" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500">
+                        <option value="low">Низкая (пожилая/больная)</option>
+                        <option value="medium" selected>Умеренная (норма)</option>
+                        <option value="high">Высокая (активные прогулки)</option>
+                        <option value="working">Рабочая/служебная</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Цель</label>
+                    <select id="setting-goal" class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500">
+                        <option value="maintenance" selected>Поддержание веса</option>
+                        <option value="loss">Снижение веса</option>
+                        <option value="gain">Набор веса</option>
+                        <option value="recovery">Восстановление</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Аллергии (через запятую)</label>
+                    <input type="text" id="setting-allergies" placeholder="говядина, курица..." class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Препараты (через запятую)</label>
+                    <input type="text" id="setting-medications" placeholder="Урзахол, Гепатосан..." class="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500">
+                </div>
                 <button onclick="saveSettings()" class="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition">
                     Сохранить
                 </button>
@@ -614,13 +646,28 @@
         </div>
     </div>
 
+    <!-- JS modules -->
+    <script src="js/IngredientDB.js"></script>
+    <script src="js/NutritionEngine.js"></script>
+    <script src="js/MealGenerator.js"></script>
+
     <script>
     // ─── CONFIG ──────────────────────────────────────────────────────────────
     const API_BASE = 'https://archie-health.onrender.com';
 
     // ─── STATE ───────────────────────────────────────────────────────────────
     let state = {
-        settings: { cals: 870, name: 'Арчибальд', age: 12, weight: 21.5 },
+        settings: {
+            cals: 870,
+            name: 'Арчибальд',
+            age: 12,
+            weight: 21.5,
+            activity: 'low',
+            goal: 'maintenance',
+            allergies: [],
+            medications: ['Урзахол', 'Гепатосан'],
+            healthIssues: []
+        },
         weightLog: [
             { date: '15.11', value: 22.1 },
             { date: '20.11', value: 21.8 },
@@ -663,29 +710,41 @@
     document.addEventListener('DOMContentLoaded', async function() {
         try {
             const loaded = await apiGet('/api/state');
-            if (loaded) {
-                state = Object.assign(state, loaded);
-            }
+            if (loaded) state = Object.assign(state, loaded);
         } catch(e) {
-            console.warn('Не удалось загрузить состояние с API, используются defaults:', e);
+            console.warn('Не удалось загрузить состояние с API:', e);
         }
         applySettings();
         renderWeightChart();
         renderMedicines();
         renderSavedRecipes();
-
         const wd = document.getElementById('weight-date');
         if (wd) wd.valueAsDate = new Date();
     });
 
     // ─── SETTINGS ────────────────────────────────────────────────────────────
     async function saveSettings() {
+        const allergiesRaw = document.getElementById('setting-allergies').value;
+        const medsRaw = document.getElementById('setting-medications').value;
         state.settings = {
             cals: parseInt(document.getElementById('setting-cals').value) || 870,
             name: document.getElementById('setting-name').value || 'Арчибальд',
             age: parseInt(document.getElementById('setting-age').value) || 12,
-            weight: parseFloat(document.getElementById('setting-weight').value) || 21.5
+            weight: parseFloat(document.getElementById('setting-weight').value) || 21.5,
+            activity: document.getElementById('setting-activity').value || 'medium',
+            goal: document.getElementById('setting-goal').value || 'maintenance',
+            allergies: allergiesRaw ? allergiesRaw.split(',').map(s => s.trim()).filter(Boolean) : [],
+            medications: medsRaw ? medsRaw.split(',').map(s => s.trim()).filter(Boolean) : [],
+            healthIssues: state.settings.healthIssues || []
         };
+        // Пересчитать норму через NutritionEngine
+        const calculatedCals = NutritionEngine.calcDailyCalories({
+            weightKg: state.settings.weight,
+            ageYears: state.settings.age,
+            activity: state.settings.activity,
+            goal: state.settings.goal
+        });
+        state.settings.cals = calculatedCals;
         try {
             await apiPost('/api/settings', state.settings);
         } catch(e) {
@@ -693,7 +752,7 @@
         }
         applySettings();
         closeModal('settings-modal');
-        showToast('✅ Настройки сохранены!', '#22c55e');
+        showToast('✅ Настройки сохранены! Норма: ' + calculatedCals + ' ккал', '#22c55e');
     }
 
     function applySettings() {
@@ -706,11 +765,14 @@
         document.getElementById('daily-norm').textContent = s.cals + ' ккал';
         document.getElementById('norm-today').textContent = s.cals;
         document.getElementById('nutrition-norm-label').textContent = '~' + s.cals + ' ккал';
-
         document.getElementById('setting-cals').value = s.cals;
         document.getElementById('setting-name').value = s.name;
         document.getElementById('setting-age').value = s.age;
         document.getElementById('setting-weight').value = s.weight;
+        if (s.activity) document.getElementById('setting-activity').value = s.activity;
+        if (s.goal) document.getElementById('setting-goal').value = s.goal;
+        if (s.allergies) document.getElementById('setting-allergies').value = (s.allergies || []).join(', ');
+        if (s.medications) document.getElementById('setting-medications').value = (s.medications || []).join(', ');
     }
 
     // ─── WEIGHT ──────────────────────────────────────────────────────────────
@@ -732,7 +794,6 @@
                 if (state.weightLog.length > 8) state.weightLog = state.weightLog.slice(-8);
             }
         } catch(e) {
-            console.error('Ошибка записи веса:', e);
             state.weightLog = state.weightLog.map(w => ({ ...w, today: false }));
             state.weightLog.push(entry);
             if (state.weightLog.length > 8) state.weightLog = state.weightLog.slice(-8);
@@ -751,9 +812,7 @@
         const max = Math.max(...log.map(w => w.value));
         const min = Math.min(...log.map(w => w.value));
         const range = max - min || 1;
-        const maxBarH = 160;
-        const minBarH = 20;
-
+        const maxBarH = 160, minBarH = 20;
         container.innerHTML = log.map(w => {
             const h = minBarH + ((w.value - min) / range) * (maxBarH - minBarH);
             const isToday = w.today;
@@ -791,7 +850,6 @@
                 state.medicines.push(med);
             }
         } catch(err) {
-            console.error('Ошибка добавления лекарства:', err);
             state.medicines.push(med);
         }
         renderMedicines();
@@ -809,7 +867,6 @@
                 state.medicines.splice(idx, 1);
             }
         } catch(e) {
-            console.error('Ошибка удаления лекарства:', e);
             state.medicines.splice(idx, 1);
         }
         renderMedicines();
@@ -820,7 +877,7 @@
         const list = document.getElementById('medicine-list');
         if (!list) return;
         if (!state.medicines.length) {
-            list.innerHTML = '<p class="text-gray-500 col-span-2 text-center py-8">Нет активных лекарств. Нажмите «Добавить».</p>';
+            list.innerHTML = '<p class="text-gray-500 col-span-2 text-center py-8">Нет активных лекарств.</p>';
             return;
         }
         list.innerHTML = state.medicines.map((med, i) => {
@@ -860,17 +917,13 @@
                 if (state.recipes.length > 10) state.recipes = state.recipes.slice(0, 10);
             }
         } catch(e) {
-            console.error('Ошибка сохранения рецепта:', e);
             state.recipes.unshift(recipe);
             if (state.recipes.length > 10) state.recipes = state.recipes.slice(0, 10);
         }
         renderSavedRecipes();
     }
 
-    function clearRecipes() {
-        state.recipes = [];
-        renderSavedRecipes();
-    }
+    function clearRecipes() { state.recipes = []; renderSavedRecipes(); }
 
     function renderSavedRecipes() {
         const section = document.getElementById('saved-recipes-section');
@@ -889,23 +942,75 @@
         ).join('');
     }
 
-    function deleteRecipe(i) {
-        state.recipes.splice(i, 1);
-        renderSavedRecipes();
+    function deleteRecipe(i) { state.recipes.splice(i, 1); renderSavedRecipes(); }
+
+    // ─── AUTO-GENERATOR (MealGenerator.js) ───────────────────────────────────
+    function buildDogProfile() {
+        const s = state.settings;
+        return {
+            weightKg: s.weight || 21.5,
+            ageYears: s.age || 12,
+            activity: s.activity || 'low',
+            goal: s.goal || 'maintenance',
+            allergies: s.allergies || [],
+            medications: s.medications || ['Урзахол', 'Гепатосан'],
+            healthIssues: s.healthIssues || []
+        };
     }
 
-    // ─── GENERATOR ───────────────────────────────────────────────────────────
+    function renderMeal(meal, title) {
+        if (!meal || meal.error) {
+            return `<div class="glass p-3 rounded-xl mb-3">
+                <p class="text-sm font-semibold text-red-400 mb-1">${title}</p>
+                <p class="text-xs text-red-300">⚠️ ${meal ? meal.error : 'Ошибка генерации'}</p>
+                ${meal && meal.details ? '<p class="text-xs text-gray-500">Белки: ' + meal.details.proteins + ', Злаки: ' + meal.details.grains + '</p>' : ''}
+            </div>`;
+        }
+        const rows = meal.ingredients.map(i =>
+            `${i.ingredient.emoji} ${i.ingredient.name} — <b>${i.weightG}г</b>`
+        ).join('<br>');
+        const n = meal.nutrition;
+        return `<div class="glass p-3 rounded-xl mb-3">
+            <p class="text-sm font-semibold text-orange-300 mb-2">${title} · ${meal.targetCals} ккал · ${meal.cookingMethod}</p>
+            <p class="text-xs text-gray-300 leading-relaxed mb-2">${rows}</p>
+            <p class="text-xs text-gray-500">Вес: ${n.totalWeight}г · Б:${n.protein}г · Ж:${n.fat}г · У:${n.carbs}г</p>
+        </div>`;
+    }
+
+    function generateDayAuto() {
+        const profile = buildDogProfile();
+        const menu = MealGenerator.generateDayMenu(profile);
+        const warningsHtml = menu.warnings.length
+            ? menu.warnings.map(w => `<div class="text-xs text-yellow-300 mb-1">${w.icon} ${w.text}</div>`).join('')
+            : '';
+        const html = `<div>
+            <div class="flex justify-between items-center mb-3">
+                <p class="text-sm font-semibold text-green-400">Рацион на ${menu.date}</p>
+                <span class="text-xs text-gray-500">${menu.totalCals} ккал/день</span>
+            </div>
+            ${warningsHtml}
+            ${renderMeal(menu.breakfast, '🌅 Завтрак')}
+            ${renderMeal(menu.dinner, '🌙 Ужин')}
+            <button onclick="saveRecipe(document.getElementById('auto-result').innerText)" class="text-xs btn-ghost text-green-400 mt-2">💾 Сохранить</button>
+        </div>`;
+        const el = document.getElementById('auto-result');
+        el.classList.remove('hidden');
+        el.innerHTML = html;
+        showToast('🤖 Авторацион готов!', '#22c55e');
+    }
+
+    // ─── MANUAL GENERATOR ────────────────────────────────────────────────────
     let selectedComponents = [];
 
     function toggleGenerator() {
         const panel = document.getElementById('generator-panel');
         const icon = document.getElementById('gen-toggle-icon');
         panel.classList.toggle('hidden');
-                icon.className = panel.classList.contains('hidden') ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+        icon.className = panel.classList.contains('hidden') ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
     }
 
     function addComponent(name, calsper100, emoji, defaultWeight) {
-        document.title='DBG:'+name;         const existing = selectedComponents.find(c => c.name === name);
+        const existing = selectedComponents.find(c => c.name === name);
         if (existing) { existing.weight += defaultWeight; }
         else { selectedComponents.push({ name, calsper100, emoji, weight: defaultWeight }); }
         updateSelectedList();
@@ -921,8 +1026,10 @@
         document.getElementById('custom-cals').value = '';
     }
 
-    function clearComponents() {
-        selectedComponents = [];
+    function clearComponents() { selectedComponents = []; updateSelectedList(); }
+
+    function changeWeight(i, delta) {
+        selectedComponents[i].weight = Math.max(10, selectedComponents[i].weight + delta);
         updateSelectedList();
     }
 
@@ -968,10 +1075,6 @@
         normProgress.style.width = pct + '%';
         normPercent.textContent = pct + '% от дневной нормы';
     }
-            function changeWeight(i, delta) {
-        selectedComponents[i].weight = Math.max(10, selectedComponents[i].weight + delta);
-        updateSelectedList();
-    }
 
     const recipes25 = [
         "Отварить курицу и рис раздельно. Смешать с тёртой морковью. Подавать тёплым.",
@@ -1004,20 +1107,21 @@
     function generateRecipe() {
         if (!selectedComponents.length) { showToast('Выберите компоненты', '#f97316'); return; }
         const names = selectedComponents.map(c => `${c.emoji} ${c.name} (${c.weight}г)`).join(', ');
-        const totalCals = selectedComponents.reduce((s,c) => s + Math.round(c.calsper100*c.weight/100), 0);
-        const baseRecipe = (() => { const stems = selectedComponents.map(c => c.name.toLowerCase().slice(0,5)); const best = recipes25.map(r => ({r, s: stems.reduce((n,w) => n+(r.toLowerCase().includes(w)?1:0),0)})).sort((a,b)=>b.s-a.s)[0]; return best.s>0 ? best.r : recipes25[Math.floor(Math.random()*recipes25.length)]; })();.map(c => c.name.toLowerCase()); const best = recipes25.map(r => ({r, s: lc.reduce((n, w) => n + (r.toLowerCase().includes(w) ? 1 : 0), 0)})).sort((a,b) => b.s-a.s)[0]; return best.s > 0 ? best.r : recipes25[Math.floor(Math.random()*recipes25.length)]; })();
+        const totalCals = selectedComponents.reduce((s, c) => s + Math.round(c.calsper100 * c.weight / 100), 0);
+        const stems = selectedComponents.map(c => c.name.toLowerCase().slice(0, 5));
+        const scored = recipes25.map(r => ({ r, s: stems.reduce((n, w) => n + (r.toLowerCase().includes(w) ? 1 : 0), 0) }));
+        scored.sort((a, b) => b.s - a.s);
+        const baseRecipe = scored[0].s > 0 ? scored[0].r : recipes25[Math.floor(Math.random() * recipes25.length)];
         const text = `Состав: ${names}.\n\n${baseRecipe}\n\n🔥 Итого: ${totalCals} ккал`;
-
         const result = document.getElementById('recipe-result');
         result.classList.remove('hidden');
         result.innerHTML = `<div class="glass p-4 rounded-xl">
             <div class="flex justify-between items-center mb-2">
                 <p class="text-sm font-semibold text-orange-400">Рецепт готов!</p>
-                <button onclick="saveRecipe(this.closest('.glass').querySelector('pre').textContent)" class="text-xs btn-ghost text-green-400">💾 Сохранить</button>
+                <button onclick="saveRecipe(document.getElementById('recipe-result').querySelector('pre').textContent)" class="text-xs btn-ghost text-green-400">💾 Сохранить</button>
             </div>
             <pre class="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">${text}</pre>
         </div>`;
-
         showToast('🍽 Рецепт сгенерирован!', '#f97316');
     }
 
@@ -1026,26 +1130,14 @@
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
     // ─── TOAST ───────────────────────────────────────────────────────────────
-    function showToast(msg, color = '#3b82f6') {
+    function showToast(msg, color) {
         const t = document.createElement('div');
         t.className = 'toast';
-        t.style.background = color;
+        t.style.background = color || '#3b82f6';
         t.textContent = msg;
         document.getElementById('toast-container').appendChild(t);
         setTimeout(() => t.remove(), 3200);
     }
-
-    // ─── REMINDER (UI only) ──────────────────────────────────────────────────
-    function toggleReminder(el) { el.classList.toggle('active'); }
-    function saveReminder(idx) { showToast('🔔 Напоминание сохранено', '#8b5cf6'); }
-    function editMedicine(idx) { showToast('Редактирование — скоро', '#6b7280'); }
-        
-                // Fix: expose addComponent to window scope for onclick handlers
-        window.addComponent = addComponent;
-        window.updateSelectedList = updateSelectedList;
-        window.changeWeight = changeWeight;
-        window.clearComponents = clearComponents;
-        window.generateRecipe = generateRecipe;
-            </script>
+    </script>
 </body>
 </html>
